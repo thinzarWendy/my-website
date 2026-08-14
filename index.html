@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Activity: Interactive Tri-State Bus</title>
+<style>
+  :root{
+    --ink:#172033;
+    --muted:#5b6473;
+    --panel:#ffffff;
+    --page:#eef3f8;
+    --line:#cbd5e1;
+    --blue:#2563eb;
+    --blue2:#dbeafe;
+    --green:#059669;
+    --green2:#d1fae5;
+    --orange:#d97706;
+    --orange2:#fef3c7;
+    --red:#dc2626;
+    --red2:#fee2e2;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page);
+    color:var(--ink);
+    line-height:1.45;
+  }
+  .page{
+    max-width:1180px;
+    margin:24px auto;
+    padding:0 18px 40px;
+  }
+  .hero{
+    background:linear-gradient(135deg,#173b6c,#2563eb);
+    color:white;
+    padding:26px 30px;
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.18);
+  }
+  .hero h1{margin:0 0 8px;font-size:32px}
+  .hero p{margin:0;opacity:.95}
+  .card{
+    background:var(--panel);
+    border-radius:16px;
+    padding:22px;
+    margin-top:18px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);
+    border:1px solid #e5eaf0;
+  }
+  h2{margin:0 0 14px;font-size:24px}
+  h3{margin:18px 0 10px}
+  .student-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+  }
+  label{font-weight:700;display:block;margin-bottom:6px}
+  input[type=text], textarea, select{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:15px;
+    background:white;
+  }
+  textarea{min-height:88px;resize:vertical}
+  .outcomes{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+  }
+  .outcome{
+    background:#f8fafc;
+    border-left:5px solid var(--blue);
+    padding:12px 14px;
+    border-radius:10px;
+  }
+  .sim-grid{
+    display:grid;
+    grid-template-columns:1.55fr .85fr;
+    gap:18px;
+    align-items:start;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:0 0 12px;
+  }
+  button{
+    border:1px solid #aeb9c8;
+    border-radius:10px;
+    padding:10px 13px;
+    background:#fff;
+    color:var(--ink);
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  button:hover{transform:translateY(-1px);background:#f8fafc}
+  button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+  button.success{background:var(--green);color:white;border-color:var(--green)}
+  button.warning{background:var(--orange);color:white;border-color:var(--orange)}
+  button.ghost{background:#f8fafc}
+  .signal-on{background:var(--green2);border-color:var(--green);color:#065f46}
+  .status{
+    border-radius:11px;
+    padding:12px 14px;
+    margin:10px 0 14px;
+    background:#f1f5f9;
+    border-left:5px solid var(--blue);
+    font-weight:700;
+    min-height:52px;
+  }
+  .mini-panel{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+  }
+  .mini-panel p{margin:7px 0}
+  .value-chip{
+    display:inline-block;
+    min-width:34px;
+    text-align:center;
+    padding:3px 8px;
+    border-radius:999px;
+    background:var(--blue2);
+    color:#1d4ed8;
+    font-weight:800;
+  }
+  svg{
+    width:100%;
+    height:auto;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+  }
+  .wire{stroke:#202733;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .control-wire{stroke:#202733;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .active-data{stroke:#059669;stroke-width:11;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:url(#glowGreen)}
+  .active-control{stroke:#f59e0b;stroke-width:9;fill:none;stroke-linecap:round;stroke-linejoin:round;filter:url(#glowOrange)}
+  .buffer{fill:white;stroke:#202733;stroke-width:4}
+  .buffer-on{fill:#d1fae5;stroke:#059669;stroke-width:6}
+  .decoder{fill:#f8fafc;stroke:#202733;stroke-width:4}
+  .label-svg{font-size:21px;font-weight:700;fill:#172033}
+  .small-svg{font-size:16px;fill:#374151}
+  .bus-value{font-size:30px;font-weight:900;fill:#dc2626}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+  }
+  th,td{
+    border:1px solid var(--line);
+    padding:9px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  th{background:#eaf0f7}
+  .current-row{background:var(--green2);font-weight:800}
+  .activity-table select{min-width:105px}
+  .feedback{
+    margin-top:12px;
+    padding:12px;
+    border-radius:10px;
+    display:none;
+  }
+  .feedback.good{display:block;background:var(--green2);border:1px solid #6ee7b7;color:#065f46}
+  .feedback.bad{display:block;background:var(--red2);border:1px solid #fca5a5;color:#991b1b}
+  .question{
+    padding:14px;
+    background:#f8fafc;
+    border-radius:11px;
+    margin-bottom:12px;
+    border:1px solid #e2e8f0;
+  }
+  .question p{margin:0 0 9px;font-weight:700}
+  .option{display:block;font-weight:400;margin:6px 0}
+  .score-box{
+    background:#172033;
+    color:white;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    margin-top:15px;
+  }
+  .score-number{font-size:38px;font-weight:900}
+  .footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .note{
+    color:var(--muted);
+    font-size:14px;
+  }
+  .instruction{
+    background:var(--orange2);
+    border-left:5px solid var(--orange);
+    border-radius:10px;
+    padding:12px 14px;
+    margin:12px 0;
+  }
+  @media(max-width:850px){
+    .student-grid,.outcomes,.sim-grid{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:white}
+    .page{max-width:none;margin:0;padding:0}
+    .hero,.card{box-shadow:none}
+    .controls,.footer-actions,#playBtn{display:none !important}
+    .card{break-inside:avoid}
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <section class="hero">
+    <h1>Student Activity: Exploring a Tri-State Bus</h1>
+    <p>Use the simulator to investigate how a decoder enables one tri-state buffer and allows one input to control a shared bus.</p>
+    <p style="margin-top:12px;font-size:18px;font-weight:700;">
+      Dr. Surekha Lanka - Director of BSc-CIS (IT and CS Programs)
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Student Information</h2>
+    <div class="student-grid">
+      <div>
+        <label for="studentName">Student Name</label>
+        <input id="studentName" type="text" placeholder="Enter your name">
+      </div>
+      <div>
+        <label for="studentId">Student ID</label>
+        <input id="studentId" type="text" placeholder="Enter your Student ID">
+      </div>
+      <div>
+        <label for="classSection">Class / Section</label>
+        <input id="classSection" type="text" placeholder="Enter class or section">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Learning Outcomes</h2>
+    <div class="outcomes">
+      <div class="outcome">Explain the purpose of the <strong>high-impedance (Z)</strong> state.</div>
+      <div class="outcome">Determine which input is selected by <strong>S1</strong> and <strong>S0</strong>.</div>
+      <div class="outcome">Explain how tri-state buffers prevent <strong>bus contention</strong>.</div>
+    </div>
+    <div class="instruction">
+      <strong>Instructions:</strong> Change the input values and control signals. Observe the highlighted decoder output, enabled buffer, selected input, and resulting bus value.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Interactive Tri-State Bus Simulator</h2>
+
+    <div class="sim-grid">
+      <div>
+        <div class="controls">
+          <button id="enableBtn" onclick="toggleSignal('E')">Enable E: 1</button>
+          <button id="s1Btn" onclick="toggleSignal('S1')">S1: 0</button>
+          <button id="s0Btn" onclick="toggleSignal('S0')">S0: 0</button>
+          <button onclick="toggleData('A')">A0: <span id="AVal">1</span></button>
+          <button onclick="toggleData('B')">B0: <span id="BVal">0</span></button>
+          <button onclick="toggleData('C')">C0: <span id="CVal">1</span></button>
+          <button onclick="toggleData('D')">D0: <span id="DVal">0</span></button>
+          <button id="playBtn" class="primary" onclick="togglePlay()">▶ Auto Play</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <svg viewBox="0 0 1050 650" role="img" aria-label="Interactive tri-state bus circuit">
+          <defs>
+            <filter id="glowGreen">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glowOrange">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <text x="780" y="35" class="label-svg">Shared bus line for bit 0</text>
+          <path class="wire" d="M615 55 H1010"/>
+          <text id="busValue" x="930" y="100" class="bus-value">1</text>
+
+          <text x="45" y="86" class="label-svg">A0</text><path class="wire" d="M95 78 H285"/>
+          <text x="45" y="186" class="label-svg">B0</text><path class="wire" d="M95 178 H365"/>
+          <text x="45" y="286" class="label-svg">C0</text><path class="wire" d="M95 278 H445"/>
+          <text x="45" y="386" class="label-svg">D0</text><path class="wire" d="M95 378 H525"/>
+
+          <polygon id="buf0" class="buffer" points="285,45 285,111 355,78"/>
+          <polygon id="buf1" class="buffer" points="365,145 365,211 435,178"/>
+          <polygon id="buf2" class="buffer" points="445,245 445,311 515,278"/>
+          <polygon id="buf3" class="buffer" points="525,345 525,411 595,378"/>
+
+          <text x="282" y="132" class="small-svg">Buffer 0</text>
+          <text x="362" y="232" class="small-svg">Buffer 1</text>
+          <text x="442" y="332" class="small-svg">Buffer 2</text>
+          <text x="522" y="432" class="small-svg">Buffer 3</text>
+
+          <path class="wire" d="M355 78 H615 V55"/>
+          <path class="wire" d="M435 178 H700 V55"/>
+          <path class="wire" d="M515 278 H785 V55"/>
+          <path class="wire" d="M595 378 H870 V55"/>
+
+          <rect x="120" y="455" width="300" height="155" rx="10" class="decoder"/>
+          <text x="229" y="527" class="label-svg">2 × 4</text>
+          <text x="216" y="555" class="label-svg">decoder</text>
+          <text x="135" y="493" class="label-svg">S1</text>
+          <text x="135" y="538" class="label-svg">S0</text>
+          <text x="135" y="583" class="label-svg">E</text>
+          <text x="385" y="483" class="label-svg">0</text>
+          <text x="385" y="518" class="label-svg">1</text>
+          <text x="385" y="553" class="label-svg">2</text>
+          <text x="385" y="588" class="label-svg">3</text>
+
+          <path class="control-wire" d="M420 476 H320 V111"/>
+          <path class="control-wire" d="M420 511 H400 V211"/>
+          <path class="control-wire" d="M420 546 H480 V311"/>
+          <path class="control-wire" d="M420 581 H560 V411"/>
+
+          <g id="activeLayer"></g>
+          <text x="475" y="628" class="small-svg">Only one enabled buffer should drive the shared bus.</text>
+        </svg>
+      </div>
+
+      <aside class="mini-panel">
+        <h3 style="margin-top:0">Current Observation</h3>
+        <p>Enable: <span id="obsE" class="value-chip">1</span></p>
+        <p>Select: <span id="obsSelect" class="value-chip">00</span></p>
+        <p>Decoder output: <span id="obsDecoder" class="value-chip">0</span></p>
+        <p>Selected input: <span id="obsInput" class="value-chip">A0</span></p>
+        <p>Bus value: <span id="obsBus" class="value-chip">1</span></p>
+        <p>Buffer state: <span id="obsState" class="value-chip">Enabled</span></p>
+
+        <h3>Selection Table</h3>
+        <table>
+          <thead>
+            <tr><th>E</th><th>S1S0</th><th>Bus source</th></tr>
+          </thead>
+          <tbody>
+            <tr id="rowZ"><td>0</td><td>XX</td><td>Z</td></tr>
+            <tr id="row0"><td>1</td><td>00</td><td>A0</td></tr>
+            <tr id="row1"><td>1</td><td>01</td><td>B0</td></tr>
+            <tr id="row2"><td>1</td><td>10</td><td>C0</td></tr>
+            <tr id="row3"><td>1</td><td>11</td><td>D0</td></tr>
+          </tbody>
+        </table>
+      </aside>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Activity 1: Complete the Observation Table</h2>
+    <p>Use the simulator to test each control combination. Select the correct bus source and bus value.</p>
+    <p class="note">Use the default input values: A0 = 1, B0 = 0, C0 = 1, D0 = 0.</p>
+
+    <table class="activity-table">
+      <thead>
+        <tr>
+          <th>Test</th>
+          <th>E</th>
+          <th>S1</th>
+          <th>S0</th>
+          <th>Load Test</th>
+          <th>Bus Source</th>
+          <th>Bus Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td><td>0</td><td>X</td><td>X</td>
+          <td><button onclick="loadCase(0,0,0)">Load</button></td>
+          <td>
+            <select id="source1">
+              <option value="">Choose</option><option>A0</option><option>B0</option><option>C0</option><option>D0</option><option>Z</option>
+            </select>
+          </td>
+          <td>
+            <select id="value1">
+              <option value="">Choose</option><option>0</option><option>1</option><option>Z</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>2</td><td>1</td><td>0</td><td>0</td>
+          <td><button onclick="loadCase(1,0,0)">Load</button></td>
+          <td>
+            <select id="source2">
+              <option value="">Choose</option><option>A0</option><option>B0</option><option>C0</option><option>D0</option><option>Z</option>
+            </select>
+          </td>
+          <td>
+            <select id="value2">
+              <option value="">Choose</option><option>0</option><option>1</option><option>Z</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>3</td><td>1</td><td>0</td><td>1</td>
+          <td><button onclick="loadCase(1,0,1)">Load</button></td>
+          <td>
+            <select id="source3">
+              <option value="">Choose</option><option>A0</option><option>B0</option><option>C0</option><option>D0</option><option>Z</option>
+            </select>
+          </td>
+          <td>
+            <select id="value3">
+              <option value="">Choose</option><option>0</option><option>1</option><option>Z</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>4</td><td>1</td><td>1</td><td>0</td>
+          <td><button onclick="loadCase(1,1,0)">Load</button></td>
+          <td>
+            <select id="source4">
+              <option value="">Choose</option><option>A0</option><option>B0</option><option>C0</option><option>D0</option><option>Z</option>
+            </select>
+          </td>
+          <td>
+            <select id="value4">
+              <option value="">Choose</option><option>0</option><option>1</option><option>Z</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>5</td><td>1</td><td>1</td><td>1</td>
+          <td><button onclick="loadCase(1,1,1)">Load</button></td>
+          <td>
+            <select id="source5">
+              <option value="">Choose</option><option>A0</option><option>B0</option><option>C0</option><option>D0</option><option>Z</option>
+            </select>
+          </td>
+          <td>
+            <select id="value5">
+              <option value="">Choose</option><option>0</option><option>1</option><option>Z</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer-actions">
+      <button class="success" onclick="checkActivity1()">Check Activity 1</button>
+      <button class="ghost" onclick="clearActivity1()">Clear Table</button>
+    </div>
+    <div id="feedback1" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity 2: Concept Check</h2>
+
+    <div class="question">
+      <p>1. What does the high-impedance state Z mean?</p>
+      <label class="option"><input type="radio" name="q1" value="a"> The output is permanently 1.</label>
+      <label class="option"><input type="radio" name="q1" value="b"> The output is electrically disconnected from the bus.</label>
+      <label class="option"><input type="radio" name="q1" value="c"> The output is permanently 0.</label>
+    </div>
+
+    <div class="question">
+      <p>2. When E = 1 and S1S0 = 10, which input drives the bus?</p>
+      <label class="option"><input type="radio" name="q2" value="a"> A0</label>
+      <label class="option"><input type="radio" name="q2" value="b"> B0</label>
+      <label class="option"><input type="radio" name="q2" value="c"> C0</label>
+      <label class="option"><input type="radio" name="q2" value="d"> D0</label>
+    </div>
+
+    <div class="question">
+      <p>3. Why should only one tri-state buffer be enabled at a time?</p>
+      <label class="option"><input type="radio" name="q3" value="a"> To increase the clock speed.</label>
+      <label class="option"><input type="radio" name="q3" value="b"> To prevent different outputs from fighting for control of the bus.</label>
+      <label class="option"><input type="radio" name="q3" value="c"> To make all inputs equal.</label>
+    </div>
+
+    <div class="question">
+      <p>4. With A0 = 1, B0 = 0, C0 = 1, and D0 = 0, what is the bus value when E = 1 and S1S0 = 01?</p>
+      <label class="option"><input type="radio" name="q4" value="a"> 0</label>
+      <label class="option"><input type="radio" name="q4" value="b"> 1</label>
+      <label class="option"><input type="radio" name="q4" value="c"> Z</label>
+    </div>
+
+    <div class="question">
+      <p>5. What is the bus value when E = 0?</p>
+      <label class="option"><input type="radio" name="q5" value="a"> A0</label>
+      <label class="option"><input type="radio" name="q5" value="b"> 0</label>
+      <label class="option"><input type="radio" name="q5" value="c"> Z</label>
+    </div>
+
+    <div class="footer-actions">
+      <button class="success" onclick="checkQuiz()">Check Activity 2</button>
+      <button class="ghost" onclick="clearQuiz()">Clear Answers</button>
+    </div>
+    <div id="feedback2" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity 3: Short Reflection</h2>
+    <div>
+      <label for="reflection1">1. In your own words, explain how the decoder and tri-state buffers work together.</label>
+      <textarea id="reflection1" placeholder="Write 2–3 sentences."></textarea>
+    </div>
+    <div style="margin-top:14px">
+      <label for="reflection2">2. What problem could occur if two buffers drive different values onto the bus at the same time?</label>
+      <textarea id="reflection2" placeholder="Write 1–2 sentences."></textarea>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Activity Score</h2>
+    <div class="score-box">
+      <div>Your automatically checked score</div>
+      <div class="score-number"><span id="totalScore">0</span> / 15</div>
+      <div>Activity 1: 10 marks &nbsp; | &nbsp; Activity 2: 5 marks</div>
+    </div>
+
+    <div class="footer-actions">
+      <button class="primary" onclick="window.print()">Print / Save as PDF</button>
+      <button class="warning" onclick="resetAll()">Reset Entire Activity</button>
+    </div>
+    <p class="note">The reflection answers are reviewed by the lecturer and are not included in the automatic score.</p>
+  </section>
+</div>
+
+<script>
+let sig = {E:1, S1:0, S0:0};
+let data = {A:1, B:0, C:1, D:0};
+let timer = null;
+let playPhase = 0;
+let activity1Score = 0;
+let quizScore = 0;
+
+const ns = "http://www.w3.org/2000/svg";
+const paths = [
+  {input:"M95 78 H285", output:"M355 78 H615 V55 H1010", control:"M420 476 H320 V111", name:"A0", key:"A"},
+  {input:"M95 178 H365", output:"M435 178 H700 V55 H1010", control:"M420 511 H400 V211", name:"B0", key:"B"},
+  {input:"M95 278 H445", output:"M515 278 H785 V55 H1010", control:"M420 546 H480 V311", name:"C0", key:"C"},
+  {input:"M95 378 H525", output:"M595 378 H870 V55 H1010", control:"M420 581 H560 V411", name:"D0", key:"D"}
+];
+
+function makePath(d, cls){
+  const p = document.createElementNS(ns,"path");
+  p.setAttribute("d",d);
+  p.setAttribute("class",cls);
+  return p;
+}
+
+function setChip(id, value){
+  document.getElementById(id).textContent = value;
+}
+
+function render(){
+  document.getElementById("enableBtn").textContent = `Enable E: ${sig.E}`;
+  document.getElementById("s1Btn").textContent = `S1: ${sig.S1}`;
+  document.getElementById("s0Btn").textContent = `S0: ${sig.S0}`;
+
+  document.getElementById("enableBtn").classList.toggle("signal-on", sig.E === 1);
+  document.getElementById("s1Btn").classList.toggle("signal-on", sig.S1 === 1);
+  document.getElementById("s0Btn").classList.toggle("signal-on", sig.S0 === 1);
+
+  for(const key of "ABCD"){
+    document.getElementById(key+"Val").textContent = data[key];
+  }
+
+  document.querySelectorAll("#rowZ,#row0,#row1,#row2,#row3").forEach(row => row.classList.remove("current-row"));
+  for(let i=0;i<4;i++) document.getElementById("buf"+i).setAttribute("class","buffer");
+
+  const layer = document.getElementById("activeLayer");
+  layer.innerHTML = "";
+
+  setChip("obsE", sig.E);
+
+  if(!sig.E){
+    document.getElementById("busValue").textContent = "Z";
+    document.getElementById("status").textContent =
+      "Enable E = 0: all decoder outputs are inactive. Every buffer is in the high-impedance state, so the bus is Z.";
+    document.getElementById("rowZ").classList.add("current-row");
+    setChip("obsSelect","XX");
+    setChip("obsDecoder","None");
+    setChip("obsInput","None");
+    setChip("obsBus","Z");
+    setChip("obsState","High-Z");
+    return;
+  }
+
+  const idx = sig.S1 * 2 + sig.S0;
+  const selected = paths[idx];
+  const value = data[selected.key];
+
+  layer.appendChild(makePath(selected.control,"active-control"));
+  layer.appendChild(makePath(selected.input,"active-data"));
+  layer.appendChild(makePath(selected.output,"active-data"));
+  document.getElementById("buf"+idx).setAttribute("class","buffer-on");
+
+  document.getElementById("busValue").textContent = value;
+  document.getElementById("status").textContent =
+    `E = 1 and S1S0 = ${sig.S1}${sig.S0}: decoder output ${idx} enables Buffer ${idx}. ${selected.name} drives the bus with value ${value}.`;
+  document.getElementById("row"+idx).classList.add("current-row");
+
+  setChip("obsSelect", `${sig.S1}${sig.S0}`);
+  setChip("obsDecoder", idx);
+  setChip("obsInput", selected.name);
+  setChip("obsBus", value);
+  setChip("obsState","Enabled");
+}
+
+function toggleSignal(key){
+  sig[key] = sig[key] ? 0 : 1;
+  render();
+}
+
+function toggleData(key){
+  data[key] = data[key] ? 0 : 1;
+  render();
+}
+
+function loadCase(E,S1,S0){
+  sig = {E:E, S1:S1, S0:S0};
+  render();
+  document.querySelector(".status").scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+function togglePlay(){
+  const button = document.getElementById("playBtn");
+  if(timer){
+    clearInterval(timer);
+    timer = null;
+    button.textContent = "▶ Auto Play";
+    return;
+  }
+
+  button.textContent = "■ Stop";
+  playPhase = 0;
+  const sequence = [
+    {E:0,S1:0,S0:0},
+    {E:1,S1:0,S0:0},
+    {E:1,S1:0,S0:1},
+    {E:1,S1:1,S0:0},
+    {E:1,S1:1,S0:1}
+  ];
+
+  timer = setInterval(() => {
+    Object.assign(sig, sequence[playPhase % sequence.length]);
+    playPhase++;
+    render();
+  }, 1400);
+}
+
+function checkActivity1(){
+  const correctSources = ["Z","A0","B0","C0","D0"];
+  const correctValues = ["Z","1","0","1","0"];
+  let score = 0;
+  let missing = false;
+
+  for(let i=1;i<=5;i++){
+    const source = document.getElementById("source"+i);
+    const value = document.getElementById("value"+i);
+
+    if(source.value === "" || value.value === "") missing = true;
+
+    source.style.borderColor = source.value === correctSources[i-1] ? "#059669" : "#dc2626";
+    value.style.borderColor = value.value === correctValues[i-1] ? "#059669" : "#dc2626";
+
+    if(source.value === correctSources[i-1]) score++;
+    if(value.value === correctValues[i-1]) score++;
+  }
+
+  activity1Score = score;
+  updateTotal();
+
+  const box = document.getElementById("feedback1");
+  if(score === 10){
+    box.className = "feedback good";
+    box.textContent = "Excellent. All five bus sources and bus values are correct. Activity 1 score: 10/10.";
+  }else{
+    box.className = "feedback bad";
+    box.textContent = `${missing ? "Complete every cell. " : ""}Activity 1 score: ${score}/10. Review the highlighted simulator path and try again.`;
+  }
+}
+
+function clearActivity1(){
+  for(let i=1;i<=5;i++){
+    for(const prefix of ["source","value"]){
+      const element = document.getElementById(prefix+i);
+      element.value = "";
+      element.style.borderColor = "";
+    }
+  }
+  activity1Score = 0;
+  updateTotal();
+  const box = document.getElementById("feedback1");
+  box.className = "feedback";
+  box.textContent = "";
+}
+
+function selectedValue(name){
+  const selected = document.querySelector(`input[name="${name}"]:checked`);
+  return selected ? selected.value : "";
+}
+
+function checkQuiz(){
+  const answers = {q1:"b", q2:"c", q3:"b", q4:"a", q5:"c"};
+  let score = 0;
+  let unanswered = 0;
+
+  for(const [name,correct] of Object.entries(answers)){
+    const choice = selectedValue(name);
+    if(!choice) unanswered++;
+    if(choice === correct) score++;
+  }
+
+  quizScore = score;
+  updateTotal();
+
+  const box = document.getElementById("feedback2");
+  if(score === 5){
+    box.className = "feedback good";
+    box.textContent = "Excellent. All concept-check answers are correct. Activity 2 score: 5/5.";
+  }else{
+    box.className = "feedback bad";
+    box.innerHTML =
+      `${unanswered ? "Some questions are unanswered. " : ""}Activity 2 score: ${score}/5.<br>` +
+      "Review: Z means electrically disconnected; S1S0 = 10 selects C0; only one buffer should be enabled to prevent bus contention.";
+  }
+}
+
+function clearQuiz(){
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  quizScore = 0;
+  updateTotal();
+  const box = document.getElementById("feedback2");
+  box.className = "feedback";
+  box.textContent = "";
+}
+
+function updateTotal(){
+  document.getElementById("totalScore").textContent = activity1Score + quizScore;
+}
+
+function resetAll(){
+  if(!confirm("Reset all controls, answers, and scores?")) return;
+
+  if(timer){
+    clearInterval(timer);
+    timer = null;
+    document.getElementById("playBtn").textContent = "▶ Auto Play";
+  }
+
+  sig = {E:1,S1:0,S0:0};
+  data = {A:1,B:0,C:1,D:0};
+
+  document.getElementById("studentName").value = "";
+  document.getElementById("studentId").value = "";
+  document.getElementById("classSection").value = "";
+  document.getElementById("reflection1").value = "";
+  document.getElementById("reflection2").value = "";
+
+  clearActivity1();
+  clearQuiz();
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+render();
+</script>
+</body>
+</html>
