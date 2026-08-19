@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Activity: Interactive SR Latch (NOR Gates)</title>
+<style>
+  :root{
+    --ink:#172033;
+    --muted:#5b6473;
+    --panel:#ffffff;
+    --page:#eef3f8;
+    --line:#cbd5e1;
+    --blue:#2563eb;
+    --blue2:#dbeafe;
+    --green:#059669;
+    --green2:#d1fae5;
+    --orange:#d97706;
+    --orange2:#fef3c7;
+    --red:#dc2626;
+    --red2:#fee2e2;
+    --purple:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page);
+    color:var(--ink);
+    line-height:1.45;
+    user-select:none;
+    -webkit-user-select:none;
+  }
+  input[type=text], textarea{
+    user-select:text;
+    -webkit-user-select:text;
+  }
+  .page{
+    max-width:1180px;
+    margin:24px auto;
+    padding:0 18px 40px;
+  }
+  .hero{
+    background:linear-gradient(135deg,#3b1d6e,#7c3aed);
+    color:white;
+    padding:26px 30px;
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.18);
+  }
+  .hero h1{margin:0 0 8px;font-size:32px}
+  .hero p{margin:0;opacity:.95}
+  .card{
+    background:var(--panel);
+    border-radius:16px;
+    padding:22px;
+    margin-top:18px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);
+    border:1px solid #e5eaf0;
+  }
+  h2{margin:0 0 14px;font-size:24px}
+  h3{margin:18px 0 10px}
+  .student-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+  }
+  label{font-weight:700;display:block;margin-bottom:6px}
+  input[type=text], textarea, select{
+    width:100%;
+    padding:10px 11px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:15px;
+    background:white;
+  }
+  textarea{min-height:88px;resize:vertical}
+  .outcomes{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+  }
+  .outcome{
+    background:#f8fafc;
+    border-left:5px solid var(--purple);
+    padding:12px 14px;
+    border-radius:10px;
+  }
+  .sim-grid{
+    display:grid;
+    grid-template-columns:1.55fr .85fr;
+    gap:18px;
+    align-items:start;
+  }
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:0 0 12px;
+  }
+  button{
+    border:1px solid #aeb9c8;
+    border-radius:10px;
+    padding:10px 13px;
+    background:#fff;
+    color:var(--ink);
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  button:hover{transform:translateY(-1px);background:#f8fafc}
+  button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+  button.success{background:var(--green);color:white;border-color:var(--green)}
+  button.warning{background:var(--orange);color:white;border-color:var(--orange)}
+  button.ghost{background:#f8fafc}
+  .signal-on{background:var(--green2);border-color:var(--green);color:#065f46}
+  .status{
+    border-radius:11px;
+    padding:12px 14px;
+    margin:10px 0 14px;
+    background:#f1f5f9;
+    border-left:5px solid var(--blue);
+    font-weight:700;
+    min-height:52px;
+  }
+  .status.invalid{background:var(--red2);border-left-color:var(--red);color:#991b1b}
+  .status.hold{background:var(--orange2);border-left-color:var(--orange);color:#7c2d12}
+  .mini-panel{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+  }
+  .mini-panel p{margin:7px 0}
+  .value-chip{
+    display:inline-block;
+    min-width:34px;
+    text-align:center;
+    padding:3px 8px;
+    border-radius:999px;
+    background:var(--blue2);
+    color:#1d4ed8;
+    font-weight:800;
+  }
+  .value-chip.hi{background:var(--green2);color:#065f46}
+  .value-chip.lo{background:#e2e8f0;color:#475569}
+  .value-chip.bad{background:var(--red2);color:#991b1b}
+  svg{
+    width:100%;
+    height:auto;
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:14px;
+  }
+  .wire{stroke:#94a3b8;stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .wire.hi{stroke:#059669;stroke-width:7;filter:url(#glowGreen)}
+  .gate{fill:#ffffff;stroke:#202733;stroke-width:4;stroke-linejoin:round}
+  .gate.hi{fill:var(--green2);stroke:#059669}
+  .bubble{fill:#ffffff;stroke:#202733;stroke-width:4}
+  .bubble.hi{fill:#6ee7b7;stroke:#059669}
+  .node{fill:#ffffff;stroke:#202733;stroke-width:3}
+  .node.hi{fill:#059669;stroke:#047857}
+  .sw-track{fill:#e2e8f0;stroke:#202733;stroke-width:3}
+  .sw-track.hi{fill:#2563eb;stroke:#1d4ed8}
+  .sw-knob{fill:#ffffff;stroke:#202733;stroke-width:2}
+  .switch{cursor:pointer}
+  .switch:hover .sw-track{stroke:#2563eb}
+  .bulb-glass{fill:#f1f5f9;stroke:#202733;stroke-width:3}
+  .bulb-glass.on{fill:#fde047;stroke:#ca8a04;filter:url(#glowYellow)}
+  .bulb-base{fill:#334155;stroke:#202733;stroke-width:2}
+  .filament{fill:none;stroke:#94a3b8;stroke-width:3;stroke-linecap:round}
+  .filament.on{stroke:#dc2626}
+  .ray{stroke:#f59e0b;stroke-width:4;stroke-linecap:round}
+  .label-svg{font-size:21px;font-weight:700;fill:#172033}
+  .small-svg{font-size:15px;fill:#475569}
+  .gate-name{font-size:16px;font-weight:700;fill:#059669}
+  .in-label{font-size:22px;font-weight:800}
+  .out-value{font-size:30px;font-weight:900;fill:#7c3aed}
+  .warn-svg{font-size:19px;font-weight:800;fill:#dc2626}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:12px;
+  }
+  th,td{
+    border:1px solid var(--line);
+    padding:9px;
+    text-align:center;
+    vertical-align:middle;
+  }
+  th{background:#eaf0f7}
+  .current-row{background:var(--green2);font-weight:800}
+  .current-row.bad{background:var(--red2)}
+  .activity-table select{min-width:95px}
+  .feedback{
+    margin-top:12px;
+    padding:12px;
+    border-radius:10px;
+    display:none;
+  }
+  .feedback.good{display:block;background:var(--green2);border:1px solid #6ee7b7;color:#065f46}
+  .feedback.bad{display:block;background:var(--red2);border:1px solid #fca5a5;color:#991b1b}
+  .question{
+    padding:14px;
+    background:#f8fafc;
+    border-radius:11px;
+    margin-bottom:12px;
+    border:1px solid #e2e8f0;
+  }
+  .question p{margin:0 0 9px;font-weight:700}
+  .option{display:block;font-weight:400;margin:6px 0}
+  .score-box{
+    background:#172033;
+    color:white;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    margin-top:15px;
+  }
+  .score-number{font-size:38px;font-weight:900}
+  .footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .note{color:var(--muted);font-size:14px}
+  .instruction{
+    background:var(--orange2);
+    border-left:5px solid var(--orange);
+    border-radius:10px;
+    padding:12px 14px;
+    margin:12px 0;
+  }
+  .ov{text-decoration:overline}
+  .log-list{
+    list-style:none;
+    margin:8px 0 0;
+    padding:0;
+    font-size:14px;
+    max-height:180px;
+    overflow:auto;
+  }
+  .log-list li{
+    padding:6px 8px;
+    border-bottom:1px dashed var(--line);
+  }
+  .log-list li:first-child{background:#fffbeb;font-weight:700}
+  .two-col{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+  }
+  .key-box{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px;
+  }
+  .key-box h3{margin-top:0}
+  @media(max-width:850px){
+    .student-grid,.outcomes,.sim-grid,.two-col{grid-template-columns:1fr}
+  }
+  .page{transition:filter .15s ease}
+  .page.blurred{filter:blur(22px);pointer-events:none;user-select:none}
+  #focusOverlay{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    background:rgba(23,32,51,.92);
+    color:white;
+    text-align:center;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    padding:20px;
+  }
+  #focusOverlay.show{display:flex}
+  #focusOverlay h2{margin:0 0 8px;font-size:24px}
+  #focusOverlay p{margin:0;opacity:.85;max-width:420px}
+  @media print{
+    body{background:white}
+    .page{max-width:none;margin:0;padding:0}
+    .hero,.card{box-shadow:none}
+    .controls,.footer-actions,#playBtn{display:none !important}
+    .card{break-inside:avoid}
+    #focusOverlay{display:none !important}
+    .page.blurred{filter:none}
+  }
+</style>
+</head>
+
+<body>
+<div id="focusOverlay">
+  <h2>Content hidden</h2>
+  <p>This activity is blurred while the browser window or tab is not focused. Click back into this tab to continue.</p>
+</div>
+<div class="page" id="pageContent">
+  <section class="hero">
+    <h1>Student Activity: Exploring an SR Latch (NOR Gates)</h1>
+    <p>Use the simulator to investigate how two cross-coupled NOR gates store one bit of information, and why the S = R = 1 combination must be avoided.</p>
+    <p style="margin-top:12px;font-size:18px;font-weight:700;">
+      Dr. Surekha Lanka - Director of BSc-CIS (IT and CS Programs)
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>Student Information</h2>
+    <div class="student-grid">
+      <div>
+        <label for="studentName">Student Name</label>
+        <input id="studentName" type="text" placeholder="Enter your name">
+      </div>
+      <div>
+        <label for="studentId">Student ID</label>
+        <input id="studentId" type="text" placeholder="Enter your Student ID">
+      </div>
+      <div>
+        <label for="classSection">Class / Section</label>
+        <input id="classSection" type="text" placeholder="Enter class or section">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Learning Outcomes</h2>
+    <div class="outcomes">
+      <div class="outcome">Explain how <strong>cross-coupled feedback</strong> allows a latch to store a bit.</div>
+      <div class="outcome">Determine <strong>Q</strong> and <strong><span class="ov">Q</span></strong> for every combination of S and R.</div>
+      <div class="outcome">Explain why <strong>S = R = 1</strong> is an invalid (forbidden) condition.</div>
+    </div>
+    <div class="instruction">
+      <strong>Instructions:</strong> Click the S and R switches in the circuit (or the buttons above it). Watch the wires, the NOR gate outputs, and the two bulbs. The latch <em>remembers</em> its last state, so the order in which you change the inputs matters.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Interactive SR Latch Simulator</h2>
+
+    <div class="sim-grid">
+      <div>
+        <div class="controls">
+          <button id="sBtn" onclick="toggleInput('S')">S (Set): 1</button>
+          <button id="rBtn" onclick="toggleInput('R')">R (Reset): 0</button>
+          <button class="ghost" onclick="pulse('S')">Pulse S</button>
+          <button class="ghost" onclick="pulse('R')">Pulse R</button>
+          <button id="playBtn" class="primary" onclick="togglePlay()">▶ Auto Play</button>
+          <button class="warning" onclick="forceReset()">Reset Latch</button>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <svg viewBox="0 0 1050 620" role="img" aria-label="Interactive SR latch built from two cross-coupled NOR gates">
+          <defs>
+            <filter id="glowGreen">
+              <feGaussianBlur stdDeviation="4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glowYellow">
+              <feGaussianBlur stdDeviation="5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- input labels -->
+          <text x="40" y="105" class="in-label" fill="#dc2626">R (Reset)</text>
+          <text x="40" y="128" class="small-svg" fill="#dc2626">Active HIGH</text>
+          <text x="40" y="405" class="in-label" fill="#2563eb">S (Set)</text>
+          <text x="40" y="428" class="small-svg" fill="#2563eb">Active HIGH</text>
+
+          <!-- R switch -->
+          <g class="switch" onclick="toggleInput('R')">
+            <rect id="swRtrack" class="sw-track" x="180" y="98" width="66" height="36" rx="18"/>
+            <circle id="swRknob" class="sw-knob" cx="198" cy="116" r="13"/>
+          </g>
+          <text id="swRval" x="256" y="124" class="label-svg">0</text>
+
+          <!-- S switch -->
+          <g class="switch" onclick="toggleInput('S')">
+            <rect id="swStrack" class="sw-track" x="180" y="398" width="66" height="36" rx="18"/>
+            <circle id="swSknob" class="sw-knob" cx="198" cy="416" r="13"/>
+          </g>
+          <text id="swSval" x="256" y="424" class="label-svg">1</text>
+
+          <!-- input wires -->
+          <path id="wR" class="wire" d="M285 116 H392"/>
+          <path id="wS" class="wire" d="M285 416 H392"/>
+
+          <!-- NOR gate 1 (top): inputs R and Qbar, output Q -->
+          <path id="g1body" class="gate" d="M380 91 Q412 141 380 191 Q470 193 502 141 Q470 89 380 91 Z"/>
+          <circle id="g1bubble" class="bubble" cx="512" cy="141" r="11"/>
+          <text x="392" y="222" class="gate-name">NOR Gate 1</text>
+          <circle id="g1in1" class="node" cx="392" cy="116" r="7"/>
+          <circle id="g1in2" class="node" cx="392" cy="166" r="7"/>
+
+          <!-- NOR gate 2 (bottom): inputs Q and S, output Qbar -->
+          <path id="g2body" class="gate" d="M380 341 Q412 391 380 441 Q470 443 502 391 Q470 339 380 341 Z"/>
+          <circle id="g2bubble" class="bubble" cx="512" cy="391" r="11"/>
+          <text x="392" y="472" class="gate-name">NOR Gate 2</text>
+          <circle id="g2in1" class="node" cx="392" cy="366" r="7"/>
+          <circle id="g2in2" class="node" cx="392" cy="416" r="7"/>
+
+          <!-- gate 1 second input stub, gate 2 first input stub -->
+          <path id="wFb1" class="wire" d="M340 166 H392"/>
+          <path id="wFb2" class="wire" d="M340 366 H392"/>
+
+          <!-- outputs -->
+          <path id="wQ" class="wire" d="M523 141 H880"/>
+          <path id="wQb" class="wire" d="M523 391 H880"/>
+
+          <!-- cross-coupled feedback -->
+          <path id="wCross1" class="wire" d="M600 141 V 215 L 340 320 V 366"/>
+          <path id="wCross2" class="wire" d="M600 391 V 320 L 340 215 V 166"/>
+          <circle id="tapQ" class="node" cx="600" cy="141" r="7"/>
+          <circle id="tapQb" class="node" cx="600" cy="391" r="7"/>
+          <text x="612" y="252" class="small-svg">feedback: Q → Gate 2</text>
+          <text x="612" y="292" class="small-svg">feedback: Q&#772; → Gate 1</text>
+
+          <!-- Q bulb -->
+          <g id="bulbQ">
+            <circle id="bulbQglass" class="bulb-glass" cx="880" cy="70" r="30"/>
+            <path id="bulbQfil" class="filament" d="M866 78 L873 58 L880 76 L887 58 L894 78"/>
+            <rect class="bulb-base" x="866" y="100" width="28" height="16" rx="3"/>
+            <path id="wQlead" class="wire" d="M880 116 V141"/>
+            <g id="bulbQrays" style="display:none">
+              <line class="ray" x1="836" y1="42" x2="824" y2="32"/>
+              <line class="ray" x1="924" y1="42" x2="936" y2="32"/>
+              <line class="ray" x1="880" y1="28" x2="880" y2="12"/>
+            </g>
+          </g>
+          <text x="915" y="150" class="label-svg" fill="#7c3aed">Q</text>
+          <text id="qValue" x="945" y="152" class="out-value">1</text>
+          <text x="915" y="176" class="small-svg" fill="#7c3aed">Output</text>
+
+          <!-- Qbar bulb -->
+          <g id="bulbQb">
+            <circle id="bulbQbglass" class="bulb-glass" cx="880" cy="300" r="30"/>
+            <path id="bulbQbfil" class="filament" d="M866 308 L873 288 L880 306 L887 288 L894 308"/>
+            <rect class="bulb-base" x="866" y="330" width="28" height="16" rx="3"/>
+            <path id="wQblead" class="wire" d="M880 346 V391"/>
+            <g id="bulbQbrays" style="display:none">
+              <line class="ray" x1="836" y1="272" x2="824" y2="262"/>
+              <line class="ray" x1="924" y1="272" x2="936" y2="262"/>
+              <line class="ray" x1="880" y1="258" x2="880" y2="242"/>
+            </g>
+          </g>
+          <text x="915" y="400" class="label-svg" fill="#7c3aed">Q&#772;</text>
+          <text id="qbValue" x="945" y="402" class="out-value">0</text>
+          <text x="915" y="426" class="small-svg" fill="#7c3aed">Complement</text>
+
+          <!-- legend -->
+          <g>
+            <rect x="30" y="486" width="500" height="112" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+            <text x="46" y="512" class="gate-name" fill="#059669">LEGEND</text>
+            <line x1="46" y1="534" x2="106" y2="534" stroke="#059669" stroke-width="7" stroke-linecap="round"/>
+            <text x="116" y="540" class="small-svg">Wire carrying logic 1 (HIGH)</text>
+            <line x1="46" y1="562" x2="106" y2="562" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+            <text x="116" y="568" class="small-svg">Wire carrying logic 0 (LOW)</text>
+            <circle cx="330" cy="534" r="11" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+            <text x="350" y="540" class="small-svg">Bulb ON = 1</text>
+            <circle cx="330" cy="562" r="11" fill="#f1f5f9" stroke="#202733" stroke-width="2"/>
+            <text x="350" y="568" class="small-svg">Bulb OFF = 0</text>
+          </g>
+
+          <text id="warnText" x="560" y="530" class="warn-svg" style="display:none">
+            Invalid state: Q and Q&#772; are both 0.
+          </text>
+          <text id="warnText2" x="560" y="558" class="warn-svg" style="display:none">
+            They are no longer complementary.
+          </text>
+        </svg>
+      </div>
+
+      <aside class="mini-panel">
+        <h3 style="margin-top:0">Current Observation</h3>
+        <p>S (Set): <span id="obsS" class="value-chip">1</span></p>
+        <p>R (Reset): <span id="obsR" class="value-chip">0</span></p>
+        <p>Q: <span id="obsQ" class="value-chip">1</span></p>
+        <p><span class="ov">Q</span>: <span id="obsQb" class="value-chip">0</span></p>
+        <p>Mode: <span id="obsMode" class="value-chip">Set</span></p>
+        <p>Stored bit: <span id="obsStored" class="value-chip">1</span></p>
+
+        <h3>Truth Table (NOR SR Latch)</h3>
+        <table>
+          <thead>
+            <tr><th>S</th><th>R</th><th>Q</th><th><span class="ov">Q</span></th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr id="rowHold"><td>0</td><td>0</td><td>Q<sub>prev</sub></td><td><span class="ov">Q</span><sub>prev</sub></td><td>Hold</td></tr>
+            <tr id="rowSet"><td>1</td><td>0</td><td>1</td><td>0</td><td>Set</td></tr>
+            <tr id="rowReset"><td>0</td><td>1</td><td>0</td><td>1</td><td>Reset</td></tr>
+            <tr id="rowInvalid"><td>1</td><td>1</td><td>0</td><td>0</td><td>Invalid</td></tr>
+          </tbody>
+        </table>
+
+        <h3>State Log</h3>
+        <ul id="logList" class="log-list"></ul>
+      </aside>
+    </div>
+
+    <div class="two-col" style="margin-top:18px">
+      <div class="key-box">
+        <h3>How it works</h3>
+        <p style="margin:6px 0"><strong>Gate 1:</strong> Q = NOR(R, <span class="ov">Q</span>)</p>
+        <p style="margin:6px 0"><strong>Gate 2:</strong> <span class="ov">Q</span> = NOR(S, Q)</p>
+        <p class="note">A NOR gate outputs 1 only when <em>every</em> input is 0. Each gate output is fed back into the other gate's input, so once an output settles it keeps itself in place — that feedback loop is the memory.</p>
+      </div>
+      <div class="key-box">
+        <h3>Worked example (the diagram)</h3>
+        <p style="margin:6px 0">R = 0 (top switch OFF), S = 1 (bottom switch ON)</p>
+        <p style="margin:6px 0">Gate 2: <span class="ov">Q</span> = NOR(1, Q) = <strong>0</strong></p>
+        <p style="margin:6px 0">Gate 1: Q = NOR(0, 0) = <strong>1</strong></p>
+        <p class="note">Result: Q = 1 (top bulb ON), <span class="ov">Q</span> = 0 (bottom bulb OFF). Returning S to 0 keeps Q = 1 — the latch has stored the bit.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Activity 1: Complete the Observation Table</h2>
+    <p>An SR latch has memory, so these steps must be applied <strong>in order</strong>. Each <em>Load</em> button replays the sequence from the start, then applies that step. Record the resulting outputs.</p>
+
+    <table class="activity-table">
+      <thead>
+        <tr>
+          <th>Step</th>
+          <th>S</th>
+          <th>R</th>
+          <th>Load Step</th>
+          <th>Q</th>
+          <th><span class="ov">Q</span></th>
+          <th>Mode</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td><td>1</td><td>0</td>
+          <td><button onclick="loadStep(1)">Load</button></td>
+          <td><select id="q1sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td><select id="qb1sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td>Set</td>
+        </tr>
+        <tr>
+          <td>2</td><td>0</td><td>0</td>
+          <td><button onclick="loadStep(2)">Load</button></td>
+          <td><select id="q2sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td><select id="qb2sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td>Hold</td>
+        </tr>
+        <tr>
+          <td>3</td><td>0</td><td>1</td>
+          <td><button onclick="loadStep(3)">Load</button></td>
+          <td><select id="q3sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td><select id="qb3sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td>Reset</td>
+        </tr>
+        <tr>
+          <td>4</td><td>0</td><td>0</td>
+          <td><button onclick="loadStep(4)">Load</button></td>
+          <td><select id="q4sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td><select id="qb4sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td>Hold</td>
+        </tr>
+        <tr>
+          <td>5</td><td>1</td><td>1</td>
+          <td><button onclick="loadStep(5)">Load</button></td>
+          <td><select id="q5sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td><select id="qb5sel"><option value="">Choose</option><option>0</option><option>1</option></select></td>
+          <td>Invalid</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer-actions">
+      <button class="success" onclick="checkActivity1()">Check Activity 1</button>
+      <button class="ghost" onclick="clearActivity1()">Clear Table</button>
+    </div>
+    <div id="feedback1" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity 2: Concept Check</h2>
+
+    <div class="question">
+      <p>1. In a NOR-based SR latch, when does a NOR gate output a 1?</p>
+      <label class="option"><input type="radio" name="q1" value="a"> When at least one input is 1.</label>
+      <label class="option"><input type="radio" name="q1" value="b"> When all of its inputs are 0.</label>
+      <label class="option"><input type="radio" name="q1" value="c"> When both inputs are 1.</label>
+    </div>
+
+    <div class="question">
+      <p>2. The latch is currently in the Set state (Q = 1). What happens when S and R are both returned to 0?</p>
+      <label class="option"><input type="radio" name="q2" value="a"> Q stays at 1 — the latch holds its previous state.</label>
+      <label class="option"><input type="radio" name="q2" value="b"> Q changes to 0.</label>
+      <label class="option"><input type="radio" name="q2" value="c"> Both outputs become 1.</label>
+    </div>
+
+    <div class="question">
+      <p>3. Why is S = R = 1 called the invalid or forbidden condition?</p>
+      <label class="option"><input type="radio" name="q3" value="a"> It draws too much current from the supply.</label>
+      <label class="option"><input type="radio" name="q3" value="b"> Q and <span class="ov">Q</span> both become 0, so they are no longer complementary, and the next state is unpredictable.</label>
+      <label class="option"><input type="radio" name="q3" value="c"> It permanently damages the NOR gates.</label>
+    </div>
+
+    <div class="question">
+      <p>4. What gives the SR latch its ability to remember one bit?</p>
+      <label class="option"><input type="radio" name="q4" value="a"> A clock signal applied to both gates.</label>
+      <label class="option"><input type="radio" name="q4" value="b"> The cross-coupled feedback from each gate output to the other gate's input.</label>
+      <label class="option"><input type="radio" name="q4" value="c"> A capacitor connected to the output.</label>
+    </div>
+
+    <div class="question">
+      <p>5. Starting from Q = 1, the inputs are set to S = 0 and R = 1. What is Q?</p>
+      <label class="option"><input type="radio" name="q5" value="a"> 0</label>
+      <label class="option"><input type="radio" name="q5" value="b"> 1</label>
+      <label class="option"><input type="radio" name="q5" value="c"> Unchanged at 1, because R is ignored.</label>
+    </div>
+
+    <div class="footer-actions">
+      <button class="success" onclick="checkQuiz()">Check Activity 2</button>
+      <button class="ghost" onclick="clearQuiz()">Clear Answers</button>
+    </div>
+    <div id="feedback2" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity 3: Short Reflection</h2>
+    <div>
+      <label for="reflection1">1. In your own words, explain how the cross-coupled feedback lets the latch remember a bit after the input returns to 0.</label>
+      <textarea id="reflection1" placeholder="Write 2–3 sentences."></textarea>
+    </div>
+    <div style="margin-top:14px">
+      <label for="reflection2">2. Set S = R = 1, then return both inputs to 0 several times using the simulator. Describe what you observe and explain why designers avoid this condition.</label>
+      <textarea id="reflection2" placeholder="Write 1–2 sentences."></textarea>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Activity Score</h2>
+    <div class="score-box">
+      <div>Your automatically checked score</div>
+      <div class="score-number"><span id="totalScore">0</span> / 15</div>
+      <div>Activity 1: 10 marks &nbsp; | &nbsp; Activity 2: 5 marks</div>
+    </div>
+
+    <div class="footer-actions">
+      <button class="primary" onclick="window.print()">Print / Save as PDF</button>
+      <button class="warning" onclick="resetAll()">Reset Entire Activity</button>
+    </div>
+    <p class="note">The reflection answers are reviewed by the lecturer and are not included in the automatic score.</p>
+  </section>
+</div>
+
+<script>
+/* ---------- anti copy/paste ----------
+   Best-effort deterrent only: blocks the right-click menu and the
+   copy/cut/paste clipboard events so students type their own answers
+   instead of pasting them in. A determined student can still bypass this
+   (view source, disable JS), so it is not a security control. */
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.addEventListener("copy", e => e.preventDefault());
+document.addEventListener("cut", e => e.preventDefault());
+document.addEventListener("paste", e => e.preventDefault());
+
+/* Blur the page whenever the window/tab loses focus (e.g. alt-tabbing to a
+   screenshot tool). This is a deterrent, not a real block — it does nothing
+   against a second device or camera pointed at the screen. */
+const pageContent = document.getElementById("pageContent");
+const focusOverlay = document.getElementById("focusOverlay");
+
+function setBlurred(hidden){
+  pageContent.classList.toggle("blurred", hidden);
+  focusOverlay.classList.toggle("show", hidden);
+}
+
+window.addEventListener("blur", () => setBlurred(true));
+window.addEventListener("focus", () => setBlurred(false));
+document.addEventListener("visibilitychange", () => setBlurred(document.hidden));
+
+/* ---------- latch model ---------- */
+let input = {S:1, R:0};
+let state = {Q:1, Qb:0};
+let race = false;
+let logEntries = [];
+let timer = null;
+let playPhase = 0;
+let activity1Score = 0;
+let quizScore = 0;
+
+/* Settle the cross-coupled NOR pair.
+   Gate 1: Q  = NOR(R, Qb)
+   Gate 2: Qb = NOR(S, Q)
+   Returns stable:false when the loop oscillates (the S=R=1 -> S=R=0 race). */
+function settle(S, R, q, qb){
+  for(let i=0;i<32;i++){
+    const nq  = (R === 1 || qb === 1) ? 0 : 1;
+    const nqb = (S === 1 || q  === 1) ? 0 : 1;
+    if(nq === q && nqb === qb) return {q:q, qb:qb, stable:true};
+    q = nq;
+    qb = nqb;
+  }
+  return {q:q, qb:qb, stable:false};
+}
+
+function evaluate(){
+  const result = settle(input.S, input.R, state.Q, state.Qb);
+  race = !result.stable;
+  if(race){
+    /* Both gates released at the same instant: the winner is decided by tiny
+       differences in gate delay, so the outcome is genuinely unpredictable. */
+    const setWins = Math.random() < 0.5;
+    state.Q  = setWins ? 1 : 0;
+    state.Qb = setWins ? 0 : 1;
+  }else{
+    state.Q  = result.q;
+    state.Qb = result.qb;
+  }
+}
+
+function modeName(){
+  if(input.S === 1 && input.R === 1) return "Invalid";
+  if(input.S === 1) return "Set";
+  if(input.R === 1) return "Reset";
+  return "Hold";
+}
+
+/* ---------- rendering ---------- */
+function setWire(id, on){
+  document.getElementById(id).setAttribute("class", on ? "wire hi" : "wire");
+}
+
+function setNode(id, on){
+  document.getElementById(id).setAttribute("class", on ? "node hi" : "node");
+}
+
+function setChip(id, value, kind){
+  const chip = document.getElementById(id);
+  chip.textContent = value;
+  chip.className = "value-chip" + (kind ? " " + kind : "");
+}
+
+function setBulb(prefix, on){
+  document.getElementById(prefix + "glass").setAttribute("class", on ? "bulb-glass on" : "bulb-glass");
+  document.getElementById(prefix + "fil").setAttribute("class", on ? "filament on" : "filament");
+}
+
+function renderSwitch(name, value){
+  const track = document.getElementById("sw" + name + "track");
+  const knob = document.getElementById("sw" + name + "knob");
+  track.setAttribute("class", value ? "sw-track hi" : "sw-track");
+  knob.setAttribute("cx", value ? 228 : 198);
+  document.getElementById("sw" + name + "val").textContent = value;
+}
+
+function render(){
+  const S = input.S, R = input.R, Q = state.Q, Qb = state.Qb;
+  const invalid = (Q === 0 && Qb === 0);
+
+  document.getElementById("sBtn").textContent = `S (Set): ${S}`;
+  document.getElementById("rBtn").textContent = `R (Reset): ${R}`;
+  document.getElementById("sBtn").classList.toggle("signal-on", S === 1);
+  document.getElementById("rBtn").classList.toggle("signal-on", R === 1);
+
+  renderSwitch("S", S);
+  renderSwitch("R", R);
+
+  /* wires */
+  setWire("wR", R === 1);
+  setWire("wS", S === 1);
+  setWire("wQ", Q === 1);
+  setWire("wQb", Qb === 1);
+  setWire("wCross1", Q === 1);   /* Q feeds gate 2 */
+  setWire("wCross2", Qb === 1);  /* Qbar feeds gate 1 */
+  setWire("wFb1", Qb === 1);     /* stub into gate 1 lower input */
+  setWire("wFb2", Q === 1);      /* stub into gate 2 upper input */
+  setWire("wQlead", Q === 1);    /* drop wire into the Q bulb */
+  setWire("wQblead", Qb === 1);  /* drop wire into the Qbar bulb */
+
+  setNode("g1in1", R === 1);
+  setNode("g1in2", Qb === 1);
+  setNode("g2in1", Q === 1);
+  setNode("g2in2", S === 1);
+  setNode("tapQ", Q === 1);
+  setNode("tapQb", Qb === 1);
+
+  /* gates */
+  document.getElementById("g1body").setAttribute("class", Q === 1 ? "gate hi" : "gate");
+  document.getElementById("g1bubble").setAttribute("class", Q === 1 ? "bubble hi" : "bubble");
+  document.getElementById("g2body").setAttribute("class", Qb === 1 ? "gate hi" : "gate");
+  document.getElementById("g2bubble").setAttribute("class", Qb === 1 ? "bubble hi" : "bubble");
+
+  /* bulbs */
+  setBulb("bulbQ", Q === 1);
+  setBulb("bulbQb", Qb === 1);
+  document.getElementById("bulbQrays").style.display = Q === 1 ? "" : "none";
+  document.getElementById("bulbQbrays").style.display = Qb === 1 ? "" : "none";
+
+  document.getElementById("qValue").textContent = Q;
+  document.getElementById("qbValue").textContent = Qb;
+
+  document.getElementById("warnText").style.display = invalid ? "" : "none";
+  document.getElementById("warnText2").style.display = invalid ? "" : "none";
+
+  /* observation panel */
+  setChip("obsS", S, S ? "hi" : "lo");
+  setChip("obsR", R, R ? "hi" : "lo");
+  setChip("obsQ", Q, invalid ? "bad" : (Q ? "hi" : "lo"));
+  setChip("obsQb", Qb, invalid ? "bad" : (Qb ? "hi" : "lo"));
+  setChip("obsMode", modeName(), invalid ? "bad" : "");
+  setChip("obsStored", invalid ? "None" : Q, invalid ? "bad" : (Q ? "hi" : "lo"));
+
+  /* truth table highlight */
+  ["rowHold","rowSet","rowReset","rowInvalid"].forEach(id => {
+    document.getElementById(id).className = "";
+  });
+  const rowId = S === 1 && R === 1 ? "rowInvalid"
+              : S === 1 ? "rowSet"
+              : R === 1 ? "rowReset"
+              : "rowHold";
+  document.getElementById(rowId).className = rowId === "rowInvalid" ? "current-row bad" : "current-row";
+
+  /* status message */
+  const status = document.getElementById("status");
+  status.className = "status";
+  if(race){
+    status.className = "status invalid";
+    status.textContent =
+      `Race condition. S and R were released from 1 to 0 at the same time, so both gates competed. ` +
+      `This run settled at Q = ${Q} and Q̄ = ${Qb}, but a real circuit gives an unpredictable result. Try it again.`;
+  }else if(invalid){
+    status.className = "status invalid";
+    status.textContent =
+      "S = 1 and R = 1: both NOR gates see a HIGH input, so Q = 0 and Q̄ = 0. " +
+      "The outputs are no longer complementary, which is why this combination is forbidden.";
+  }else if(S === 1 && R === 0){
+    status.textContent = "S = 1, R = 0 (Set). Gate 2 output Q̄ = 0, so Gate 1 sees two 0s and drives Q = 1. The top bulb is ON.";
+  }else if(S === 0 && R === 1){
+    status.textContent = "S = 0, R = 1 (Reset). Gate 1 output Q = 0, so Gate 2 sees two 0s and drives Q̄ = 1. The bottom bulb is ON.";
+  }else{
+    status.className = "status hold";
+    status.textContent =
+      `S = 0, R = 0 (Hold). Neither input is active, so the feedback loop keeps the previous value. The latch is storing Q = ${Q}.`;
+  }
+}
+
+/* ---------- log ---------- */
+function addLog(action){
+  const label = race ? "race" : modeName().toLowerCase();
+  logEntries.unshift(`${action} → S=${input.S}, R=${input.R} → Q=${state.Q}, Q̄=${state.Qb} (${label})`);
+  logEntries = logEntries.slice(0, 12);
+  document.getElementById("logList").innerHTML =
+    logEntries.map(text => `<li>${text}</li>`).join("");
+}
+
+/* ---------- interaction ---------- */
+function applyInputs(S, R, action){
+  input.S = S;
+  input.R = R;
+  evaluate();
+  render();
+  addLog(action);
+}
+
+function toggleInput(name){
+  const next = {S:input.S, R:input.R};
+  next[name] = next[name] ? 0 : 1;
+  applyInputs(next.S, next.R, `Toggle ${name}`);
+}
+
+/* Drive one input HIGH briefly, then release it — the normal way an SR latch
+   is used in practice. The other input keeps whatever value it already had. */
+function pulse(name){
+  const held = name === "S" ? {S:1, R:input.R} : {S:input.S, R:1};
+  applyInputs(held.S, held.R, `Pulse ${name} HIGH`);
+  setTimeout(() => {
+    const released = name === "S" ? {S:0, R:input.R} : {S:input.S, R:0};
+    applyInputs(released.S, released.R, `Pulse ${name} back to LOW`);
+  }, 700);
+}
+
+function forceReset(){
+  applyInputs(0, 1, "Reset latch");
+  setTimeout(() => applyInputs(0, 0, "Return to Hold"), 500);
+}
+
+function togglePlay(){
+  const button = document.getElementById("playBtn");
+  if(timer){
+    clearInterval(timer);
+    timer = null;
+    button.textContent = "▶ Auto Play";
+    return;
+  }
+
+  button.textContent = "■ Stop";
+  playPhase = 0;
+  const sequence = [
+    {S:1, R:0, name:"Set"},
+    {S:0, R:0, name:"Hold"},
+    {S:0, R:1, name:"Reset"},
+    {S:0, R:0, name:"Hold"},
+    {S:1, R:1, name:"Invalid"},
+    {S:0, R:1, name:"Recover with Reset"}
+  ];
+
+  timer = setInterval(() => {
+    const step = sequence[playPhase % sequence.length];
+    playPhase++;
+    applyInputs(step.S, step.R, "Auto: " + step.name);
+  }, 1600);
+}
+
+/* ---------- Activity 1 ---------- */
+const A1_STEPS = [
+  {S:1, R:0},
+  {S:0, R:0},
+  {S:0, R:1},
+  {S:0, R:0},
+  {S:1, R:1}
+];
+
+function loadStep(n){
+  if(timer){
+    clearInterval(timer);
+    timer = null;
+    document.getElementById("playBtn").textContent = "▶ Auto Play";
+  }
+
+  /* Start from a known Reset state, then replay steps 1..n so the answer
+     never depends on whatever the student left on screen. */
+  state = {Q:0, Qb:1};
+  race = false;
+  for(let i = 0; i < n; i++){
+    input.S = A1_STEPS[i].S;
+    input.R = A1_STEPS[i].R;
+    evaluate();
+  }
+  render();
+  addLog(`Activity 1 step ${n}`);
+  document.getElementById("status").scrollIntoView({behavior:"smooth", block:"center"});
+}
+
+function checkActivity1(){
+  const correctQ  = ["1","1","0","0","0"];
+  const correctQb = ["0","0","1","1","0"];
+  let score = 0;
+  let missing = false;
+
+  for(let i = 1; i <= 5; i++){
+    const q = document.getElementById("q" + i + "sel");
+    const qb = document.getElementById("qb" + i + "sel");
+
+    if(q.value === "" || qb.value === "") missing = true;
+
+    q.style.borderColor  = q.value  === correctQ[i-1]  ? "#059669" : "#dc2626";
+    qb.style.borderColor = qb.value === correctQb[i-1] ? "#059669" : "#dc2626";
+
+    if(q.value  === correctQ[i-1])  score++;
+    if(qb.value === correctQb[i-1]) score++;
+  }
+
+  activity1Score = score;
+  updateTotal();
+
+  const box = document.getElementById("feedback1");
+  if(score === 10){
+    box.className = "feedback good";
+    box.textContent = "Excellent. All five output pairs are correct. Activity 1 score: 10/10.";
+  }else{
+    box.className = "feedback bad";
+    box.textContent =
+      `${missing ? "Complete every cell. " : ""}Activity 1 score: ${score}/10. ` +
+      "Load each step again and remember that Hold keeps the value from the step before it.";
+  }
+}
+
+function clearActivity1(){
+  for(let i = 1; i <= 5; i++){
+    ["q", "qb"].forEach(prefix => {
+      const element = document.getElementById(prefix + i + "sel");
+      element.value = "";
+      element.style.borderColor = "";
+    });
+  }
+  activity1Score = 0;
+  updateTotal();
+  const box = document.getElementById("feedback1");
+  box.className = "feedback";
+  box.textContent = "";
+}
+
+/* ---------- Activity 2 ---------- */
+function selectedValue(name){
+  const selected = document.querySelector(`input[name="${name}"]:checked`);
+  return selected ? selected.value : "";
+}
+
+function checkQuiz(){
+  const answers = {q1:"b", q2:"a", q3:"b", q4:"b", q5:"a"};
+  let score = 0;
+  let unanswered = 0;
+
+  for(const [name, correct] of Object.entries(answers)){
+    const choice = selectedValue(name);
+    if(!choice) unanswered++;
+    if(choice === correct) score++;
+  }
+
+  quizScore = score;
+  updateTotal();
+
+  const box = document.getElementById("feedback2");
+  if(score === 5){
+    box.className = "feedback good";
+    box.textContent = "Excellent. All concept-check answers are correct. Activity 2 score: 5/5.";
+  }else{
+    box.className = "feedback bad";
+    box.innerHTML =
+      `${unanswered ? "Some questions are unanswered. " : ""}Activity 2 score: ${score}/5.<br>` +
+      "Review: a NOR gate outputs 1 only when all inputs are 0; S = R = 0 holds the stored bit; " +
+      "S = R = 1 drives both outputs to 0, which breaks the complementary relationship.";
+  }
+}
+
+function clearQuiz(){
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  quizScore = 0;
+  updateTotal();
+  const box = document.getElementById("feedback2");
+  box.className = "feedback";
+  box.textContent = "";
+}
+
+function updateTotal(){
+  document.getElementById("totalScore").textContent = activity1Score + quizScore;
+}
+
+/* ---------- reset ---------- */
+function resetAll(){
+  if(!confirm("Reset all controls, answers, and scores?")) return;
+
+  if(timer){
+    clearInterval(timer);
+    timer = null;
+    document.getElementById("playBtn").textContent = "▶ Auto Play";
+  }
+
+  input = {S:1, R:0};
+  state = {Q:1, Qb:0};
+  race = false;
+  logEntries = [];
+  document.getElementById("logList").innerHTML = "";
+
+  document.getElementById("studentName").value = "";
+  document.getElementById("studentId").value = "";
+  document.getElementById("classSection").value = "";
+  document.getElementById("reflection1").value = "";
+  document.getElementById("reflection2").value = "";
+
+  clearActivity1();
+  clearQuiz();
+  render();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+evaluate();
+render();
+addLog("Initial state");
+</script>
+</body>
+</html>
