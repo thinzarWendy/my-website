@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Java Midterm Exam — University Parking Fee</title>
+  <style>
+    :root { --bg:#f4f6f7; --surface:#ffffff; --ink:#1f2933; --muted:#5d6b77; --border:#cfd8dc; --primary:#365b32; --primary-dark:#254421; --soft:#eaf2e8; --warning:#914a23; --success:#2f7128; --radius:12px; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font-family:Arial,Helvetica,sans-serif; line-height:1.55; }
+    .page { max-width:980px; margin:0 auto; padding:28px 18px 64px; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:18px; padding-bottom:18px; border-bottom:2px solid var(--primary); }
+    h1,h2 { margin-top:0; } h1 { margin-bottom:4px; font-family:Georgia,serif; font-size:clamp(1.8rem,4vw,2.6rem); } h2 { font-family:Georgia,serif; font-size:1.55rem; color:var(--primary-dark); }
+    .subtitle,.muted,.small { color:var(--muted); } .small { font-size:.88rem; }
+    .card { margin-top:22px; padding:24px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+    .metadata { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .metadata div { padding:12px; border-radius:8px; background:#f8faf8; border:1px solid var(--border); }
+    .metadata span { display:block; margin-bottom:4px; font-size:.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+    .student-grid,.two-column { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    label { display:grid; gap:6px; font-weight:700; font-size:.94rem; }
+    input,textarea { width:100%; padding:11px 12px; border:1px solid var(--border); border-radius:8px; background:#fff; font:inherit; }
+    textarea { min-height:250px; resize:vertical; font-family:Consolas,"Courier New",monospace; font-size:14px; line-height:1.5; }
+    .instruction { margin:16px 0; padding:14px 16px; background:var(--soft); border-left:5px solid var(--primary); border-radius:7px; }
+    .instruction ul { margin-bottom:0; padding-left:22px; }
+    code { padding:2px 5px; border-radius:4px; background:#edf0ec; font-family:Consolas,"Courier New",monospace; font-size:.9em; }
+    .step { display:none; } .step.active { display:block; }
+    .progress-header { display:flex; justify-content:space-between; gap:16px; color:var(--muted); font-size:.92rem; }
+    .progress-track { height:10px; margin:8px 0 12px; overflow:hidden; background:#dce4dc; border-radius:999px; }
+    .progress-fill { width:25%; height:100%; background:var(--primary); transition:width .25s ease; }
+    .step-list { display:flex; flex-wrap:wrap; gap:6px; }
+    .step-label { padding:4px 9px; border:1px solid var(--border); border-radius:999px; color:var(--muted); font-size:.78rem; }
+    .step-label.active { color:#fff; background:var(--primary); border-color:var(--primary); }
+    .navigation { display:flex; justify-content:space-between; gap:10px; margin-top:20px; }
+    .right-buttons { display:flex; gap:10px; margin-left:auto; }
+    button,.button-link { display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:10px 15px; color:var(--ink); background:#fff; border:1px solid var(--border); border-radius:8px; cursor:pointer; font:inherit; font-weight:700; text-decoration:none; }
+    button.primary,.button-link.primary { color:#fff; background:var(--primary); border-color:var(--primary); }
+    button.primary:hover,.button-link.primary:hover { background:var(--primary-dark); }
+    .combined-code { min-height:520px; }
+    .result { display:none; margin-top:14px; padding:13px; border-radius:8px; background:#fcefe9; color:var(--warning); border:1px solid #e5b8a5; }
+    .result.success { color:var(--success); background:#edf7eb; border-color:#acd5a6; }
+    table { width:100%; border-collapse:collapse; margin-top:12px; } th,td { padding:10px; border-bottom:1px solid var(--border); text-align:left; } th { background:#f1f5f1; }
+    @media(max-width:700px) { header,.navigation { flex-direction:column; align-items:flex-start; } .metadata,.student-grid,.two-column { grid-template-columns:1fr; } .right-buttons { margin-left:0; flex-wrap:wrap; } .card { padding:18px; } }
+    @media print { body { background:#fff; } .page { max-width:none; padding:.45in; } .navigation,.runner-buttons,header button { display:none !important; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div>
+        <h1>Java Midterm Practical Exam</h1>
+        <p class="subtitle">Project: University Parking Fee System</p>
+      </div>
+      <button type="button" onclick="window.print()">Print / Save PDF</button>
+    </header>
+
+    <section class="card">
+      <p><strong>Project scenario:</strong> A university parking office needs a simple Java console program to display a driver's vehicle information and calculate the parking payment.</p>
+      <div class="metadata">
+        <div><span>Course</span><strong>Introduction to Java Programming</strong></div>
+        <div><span>Duration</span><strong>1 Hour 30 Minutes</strong></div>
+        <div><span>Total Marks</span><strong>50 Marks</strong></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Student Information</h2>
+      <div class="student-grid">
+        <label>Student Name *<input id="examName" type="text" placeholder="Enter full name"></label>
+        <label>Student ID *<input id="examStudentId" type="text" placeholder="Enter student ID"></label>
+        <label>Section *<input id="examSection" type="text" placeholder="Enter section"></label>
+        <label>Date *<input id="examDate" type="text" placeholder="Enter date"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="progress-header"><span id="stepText">Step 1 of 4</span><span>Complete each section before continuing</span></div>
+      <div class="progress-track"><div id="progressFill" class="progress-fill"></div></div>
+      <div id="stepList" class="step-list"></div>
+    </section>
+
+    <form id="parkingExam" novalidate>
+      <section class="card step active" data-step="1">
+        <h2>Step 1: Driver and Vehicle Profile — 15 Marks</h2>
+        <p class="muted">Write only the Java statements for this part. Do not write the complete program yet.</p>
+        <div class="instruction"><strong>Instruction</strong><ul>
+          <li>Declare <code>driverName</code> as a <code>String</code> with value <code>"Surekha_Lanka"</code>.</li>
+          <li>Declare <code>vehicleRegistration</code> as a <code>String</code> with value <code>"1กข1234"</code>.</li>
+          <li>Declare <code>vehicleType</code> as a <code>char</code> with value <code>'C'</code>.</li>
+          <li>Declare <code>parkingPermit</code> as a <code>boolean</code> with value <code>true</code>.</li>
+          <li>Print the heading <code>Driver and Vehicle Profile</code> and all details with labels.</li>
+        </ul></div>
+        <label>Write only Part A Java statements *<textarea id="partA" placeholder='String driverName = "Surekha_Lanka";\n// Continue with Part A statements here'></textarea></label>
+        <div class="navigation"><span></span><div class="right-buttons"><button type="button" class="primary" data-next>Next: Parking Charges</button></div></div>
+      </section>
+
+      <section class="card step" data-step="2">
+        <h2>Step 2: Parking Charges — 15 Marks</h2>
+        <p class="muted">Write only the declarations, calculation, and output statements for the parking charges.</p>
+        <div class="instruction"><strong>Instruction</strong><ul>
+          <li>Declare <code>parkingHours</code> as an <code>int</code> with value <code>6</code>.</li>
+          <li>Declare <code>feePerHour</code> as a <code>double</code> with value <code>20.00</code>.</li>
+          <li>Declare <code>campusServiceFee</code> as a <code>double</code> with value <code>15.00</code>.</li>
+          <li>Calculate <code>parkingCost</code> using: <code>parkingHours * feePerHour</code>.</li>
+          <li>Calculate <code>totalPayment</code> using: <code>parkingCost + campusServiceFee</code>.</li>
+          <li>Print heading <code>Parking Charges</code> and display both calculated values.</li>
+        </ul></div>
+        <label>Write only Part B Java statements *<textarea id="partB" placeholder="// Parking variables, calculations, and output"></textarea></label>
+        <div class="navigation"><button type="button" data-prev>Previous</button><div class="right-buttons"><button type="button" class="primary" data-next>Next: Payment Summary</button></div></div>
+      </section>
+
+      <section class="card step" data-step="3">
+        <h2>Step 3: Payment Summary — 10 Marks</h2>
+        <p class="muted">Use the variables from earlier steps. Write only the final payment output statements.</p>
+        <div class="instruction"><strong>Instruction</strong><ul>
+          <li>Print the heading <code>Payment Summary</code>.</li>
+          <li>Display <code>driverName</code> and <code>totalPayment</code> with suitable labels.</li>
+          <li>Print a blank line.</li>
+          <li>End with: <code>Thank you, "Surekha_Lanka"!</code>.</li>
+          <li>Use an escape sequence to display quotation marks around the driver name.</li>
+        </ul></div>
+        <label>Write only Part C Java statements *<textarea id="partC" placeholder="// Payment Summary output and escaped quotation marks"></textarea></label>
+        <div class="navigation"><button type="button" data-prev>Previous</button><div class="right-buttons"><button type="button" class="primary" data-next>Next: Build and Run</button></div></div>
+      </section>
+
+      <section class="card step" data-step="4">
+        <h2>Step 4: Build, Run, and Verify — 10 Marks</h2>
+        <p class="muted">Your answers from Steps 1–3 are combined below. Copy the program, run it in an online Java compiler, and paste your exact console output.</p>
+        <div class="two-column">
+          <div>
+            <label>Complete Java Program<textarea id="combinedCode" class="combined-code" readonly></textarea></label>
+            <div class="navigation runner-buttons"><button type="button" data-prev>Previous</button><div class="right-buttons"><button type="button" id="copyCode">Copy Program</button><a class="button-link primary" href="https://www.jdoodle.com/online-java-compiler" target="_blank" rel="noopener noreferrer">Open Java Runner</a></div></div>
+          </div>
+          <div>
+            <label>Paste Console Output from Java Runner *<textarea id="studentOutput" placeholder="Paste the exact output from your Java program here..."></textarea></label>
+            <div class="runner-buttons" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;"><button type="button" class="primary" id="checkOutput">Check Output</button><button type="button" id="showExpected">Show Expected Output</button></div>
+            <div id="resultMessage" class="result"></div>
+            <p class="small">Submit the completed exam HTML/PDF and the Java source file if your lecturer requests both files.</p>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <section class="card"><h2>Marking Scheme</h2><table><thead><tr><th>Assessment criterion</th><th>Marks</th></tr></thead><tbody>
+      <tr><td>Correct class name and <code>main</code> method structure</td><td>5</td></tr>
+      <tr><td>Driver and vehicle variables with suitable data types</td><td>10</td></tr>
+      <tr><td>Driver and vehicle profile output</td><td>5</td></tr>
+      <tr><td>Parking charge variables and data types</td><td>10</td></tr>
+      <tr><td>Correct <code>parkingCost</code> and <code>totalPayment</code> calculations</td><td>10</td></tr>
+      <tr><td>Correct output labels and formatting</td><td>5</td></tr>
+      <tr><td>Escape sequence and final thank-you message</td><td>5</td></tr>
+      <tr><th>Total</th><th>50</th></tr>
+    </tbody></table></section>
+  </div>
+
+  <script>
+    const steps = Array.from(document.querySelectorAll('.step'));
+    const stepList = document.getElementById('stepList');
+    const progressFill = document.getElementById('progressFill');
+    const stepText = document.getElementById('stepText');
+    let currentStep = 1;
+
+    for (let i = 1; i <= 4; i++) {
+      const label = document.createElement('span');
+      label.className = 'step-label';
+      label.textContent = 'Step ' + i;
+      stepList.appendChild(label);
+    }
+
+    function showStep(number) {
+      currentStep = number;
+      steps.forEach(step => step.classList.toggle('active', Number(step.dataset.step) === number));
+      Array.from(stepList.children).forEach((label, index) => label.classList.toggle('active', index + 1 === number));
+      progressFill.style.width = (number / 4 * 100) + '%';
+      stepText.textContent = 'Step ' + number + ' of 4';
+      if (number === 4) buildProgram();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function isCurrentStepComplete() {
+      const requiredFields = { 1: ['examName', 'examStudentId', 'examSection', 'examDate', 'partA'], 2: ['partB'], 3: ['partC'] };
+      const fields = requiredFields[currentStep] || [];
+      for (const id of fields) {
+        const field = document.getElementById(id);
+        if (!field || field.value.trim() === '') {
+          alert('Please complete all required fields in this step before continuing.');
+          if (field) field.focus();
+          return false;
+        }
+      }
+      return true;
+    }
+
+    document.querySelectorAll('[data-next]').forEach(button => button.addEventListener('click', () => { if (isCurrentStepComplete()) showStep(currentStep + 1); }));
+    document.querySelectorAll('[data-prev]').forEach(button => button.addEventListener('click', () => showStep(currentStep - 1)));
+
+    function buildProgram() {
+      const partA = document.getElementById('partA').value.trim();
+      const partB = document.getElementById('partB').value.trim();
+      const partC = document.getElementById('partC').value.trim();
+      document.getElementById('combinedCode').value = `public class UniversityParkingFee {
+    public static void main(String[] args) {
+
+${partA}
+
+${partB}
+
+${partC}
+    }
+}`;
+    }
+
+    document.getElementById('copyCode').addEventListener('click', async () => {
+      buildProgram();
+      const button = document.getElementById('copyCode');
+      try {
+        await navigator.clipboard.writeText(document.getElementById('combinedCode').value);
+        button.textContent = 'Copied';
+        setTimeout(() => button.textContent = 'Copy Program', 1300);
+      } catch (error) {
+        button.textContent = 'Select and Copy';
+        setTimeout(() => button.textContent = 'Copy Program', 1600);
+      }
+    });
+
+    const expectedOutput = `===== University Parking System =====
+
+Driver and Vehicle Profile
+Driver Name: Surekha_Lanka
+Vehicle Registration: 1กข1234
+Vehicle Type: C
+Parking Permit: true
+
+Parking Charges
+Parking Cost: 120.0
+Campus Service Fee: 15.0
+Total Payment: 135.0
+
+Payment Summary
+Driver: Surekha_Lanka
+Amount to Pay: 135.0
+
+Thank you, "Surekha_Lanka"!`;
+
+    function normalize(text) { return text.replace(/\r\n/g, '\n').trim(); }
+    document.getElementById('showExpected').addEventListener('click', () => document.getElementById('studentOutput').value = expectedOutput);
+    document.getElementById('checkOutput').addEventListener('click', () => {
+      const output = normalize(document.getElementById('studentOutput').value);
+      const result = document.getElementById('resultMessage');
+      result.style.display = 'block';
+      if (output === '') {
+        result.className = 'result';
+        result.textContent = 'Paste the Java console output before checking.';
+      } else if (output === normalize(expectedOutput)) {
+        result.className = 'result success';
+        result.textContent = 'Correct. Your console output matches the expected output.';
+      } else {
+        result.className = 'result';
+        result.textContent = 'The output does not fully match. Check spelling, labels, blank lines, quotation marks, and calculated values.';
+      }
+    });
+
+    showStep(1);
+  </script>
+</body>
+</html>
