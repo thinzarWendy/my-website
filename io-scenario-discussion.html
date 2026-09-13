@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I/O Scenario Discussion Challenge</title>
+<style>
+  :root{
+    --ink:#172033;
+    --muted:#5b6473;
+    --panel:#ffffff;
+    --page:#eef3f8;
+    --line:#cbd5e1;
+    --blue:#2563eb;
+    --purple:#7c3aed;
+    --green:#059669;
+    --green2:#d1fae5;
+    --red:#ef4444;
+    --red2:#fee2e2;
+    --teal:#14b8a6;
+    --teal2:#ccfbf1;
+    --gold:#d97706;
+    --gold2:#fef3c7;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page);
+    color:var(--ink);
+    line-height:1.5;
+  }
+  .page{max-width:900px;margin:24px auto;padding:0 18px 50px}
+  .hero{
+    background:linear-gradient(135deg,#1f2937,#4338ca);
+    color:white;
+    padding:26px 30px;
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.18);
+  }
+  .hero h1{margin:0 0 8px;font-size:30px}
+  .hero p{margin:0;opacity:.95}
+  .card{
+    background:var(--panel);
+    border-radius:16px;
+    padding:24px;
+    margin-top:18px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);
+    border:1px solid #e5eaf0;
+  }
+  .points-banner{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    justify-content:center;
+    text-align:center;
+  }
+  .points-chip{
+    flex:1;
+    min-width:220px;
+    background:var(--gold2);
+    border:2px solid var(--gold);
+    border-radius:14px;
+    padding:16px;
+  }
+  .points-chip.alt{background:var(--green2);border-color:var(--green)}
+  .points-chip .num{font-size:30px;font-weight:900;color:var(--ink)}
+  .points-chip .lbl{font-weight:700;color:var(--muted)}
+  .instruction{
+    background:#eef2ff;
+    border-left:5px solid var(--blue);
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:6px;
+  }
+  .center{text-align:center}
+  button{
+    border:none;
+    border-radius:12px;
+    padding:16px 26px;
+    font-size:18px;
+    font-weight:800;
+    cursor:pointer;
+    color:white;
+    background:linear-gradient(135deg,#4338ca,#7c3aed);
+    box-shadow:0 6px 16px rgba(76,29,149,.3);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  button:hover:not(:disabled){transform:translateY(-2px)}
+  button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  button.secondary{
+    background:linear-gradient(135deg,#0891b2,#0d9488);
+    box-shadow:0 6px 16px rgba(13,148,136,.3);
+    font-size:16px;
+    padding:13px 20px;
+  }
+  button.hint-btn{
+    background:#fff;
+    color:var(--gold);
+    border:2px solid var(--gold);
+    font-size:14px;
+    font-weight:700;
+    padding:7px 14px;
+    box-shadow:none;
+  }
+  button.hint-btn:hover:not(:disabled){transform:none;background:var(--gold2)}
+  .locked-tag{
+    display:inline-block;
+    background:#e2e8f0;
+    color:#475569;
+    font-weight:700;
+    font-size:14px;
+    padding:6px 14px;
+    border-radius:999px;
+    margin-top:10px;
+  }
+  #drawStage{margin:6px 0 4px}
+  .dice{
+    display:inline-block;
+    font-size:52px;
+    margin-bottom:6px;
+  }
+  .dice.rolling{animation:spin .6s ease}
+  @keyframes spin{
+    0%{transform:rotate(0)}
+    100%{transform:rotate(360deg)}
+  }
+  .scenario-card{
+    display:none;
+    margin-top:20px;
+    border-radius:18px;
+    padding:28px;
+    color:white;
+    background:linear-gradient(160deg,var(--sc1),var(--sc2));
+  }
+  .scenario-card.show{display:block}
+  .scenario-card.theme-red{--sc1:#f87171;--sc2:#dc2626}
+  .scenario-card.theme-teal{--sc1:#2dd4bf;--sc2:#0f766e}
+  .badge{
+    display:inline-block;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.6);
+    border-radius:999px;
+    padding:6px 16px;
+    font-weight:800;
+    font-size:13px;
+    letter-spacing:.03em;
+  }
+  .scenario-card h2{font-size:28px;margin:14px 0 4px}
+  .scenario-icons{font-size:44px;margin:8px 0}
+  .scenario-title{font-size:22px;font-weight:800;border-bottom:2px solid rgba(255,255,255,.5);padding-bottom:10px;margin-bottom:16px}
+  .situation-box{
+    background:rgba(255,255,255,.14);
+    border-radius:12px;
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+  .situation-box h3{margin:0 0 8px;font-size:16px}
+  .fact{
+    background:rgba(255,255,255,.16);
+    border-radius:9px;
+    padding:9px 12px;
+    margin-top:8px;
+    font-size:15px;
+  }
+  .fact.warn{background:rgba(255,255,255,.28);border-left:4px solid #fff}
+  #discussionStage{margin-top:20px}
+  .q-block{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-top:12px;
+  }
+  .q-head{display:flex;align-items:flex-start;gap:10px}
+  .q-num{
+    flex:none;
+    width:28px;height:28px;
+    border-radius:50%;
+    background:var(--purple);
+    color:white;
+    font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;
+  }
+  .q-text{font-weight:700;flex:1}
+  .hint-area{margin-top:10px;margin-left:38px}
+  .hint-text{
+    display:none;
+    background:var(--gold2);
+    border-left:4px solid var(--gold);
+    border-radius:8px;
+    padding:10px 12px;
+    margin-top:8px;
+    font-size:14px;
+    color:#7c2d12;
+  }
+  .hint-text.show{display:block}
+  .ready-note{
+    margin-top:24px;
+    background:var(--green2);
+    border:2px solid var(--green);
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    font-weight:800;
+    font-size:17px;
+    color:#065f46;
+  }
+  .footer-reset{
+    text-align:center;
+    margin-top:30px;
+  }
+  .footer-reset a{
+    color:#94a3b8;
+    font-size:12px;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  @media(max-width:600px){
+    .points-banner{flex-direction:column}
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <section class="hero">
+    <h1>I/O Method Discussion Challenge</h1>
+    <p>Draw your scenario, study it, then work through the discussion questions with hints if you get stuck.</p>
+  </section>
+
+  <section class="card points-banner">
+    <div class="points-chip">
+      <div class="num">15 pts</div>
+      <div class="lbl">Discussion with the instructor</div>
+    </div>
+    <div class="points-chip alt">
+      <div class="num">15 pts</div>
+      <div class="lbl">Answering the questions</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="instruction">
+      <strong>Instructions:</strong> Press <em>Draw My Scenario</em> below. It picks one I/O scenario at random and locks it in — you only get one draw, so you can't reroll for an easier one. Read the situation, then reveal the discussion questions. Use a hint only if your group is stuck.
+    </div>
+
+    <div id="drawStage" class="center">
+      <div class="dice" id="dice">🎲</div><br>
+      <button id="drawBtn" onclick="drawScenario()">Draw My Scenario</button>
+      <div id="lockedTag"></div>
+    </div>
+
+    <div id="scenarioCard" class="scenario-card">
+      <span id="scBadge" class="badge"></span>
+      <h2 id="scNumber"></h2>
+      <div id="scIcons" class="scenario-icons"></div>
+      <div id="scTitle" class="scenario-title"></div>
+      <div class="situation-box">
+        <h3>The Situation</h3>
+        <p id="scSituation"></p>
+        <div id="scFacts"></div>
+      </div>
+    </div>
+
+    <div id="discussionGate" class="center" style="display:none;margin-top:18px">
+      <button class="secondary" id="discussBtn" onclick="revealDiscussion()">Show Discussion Questions</button>
+    </div>
+
+    <div id="discussionStage" style="display:none"></div>
+
+    <div id="readyNote" class="ready-note" style="display:none">
+      Ready? Bring your answers to the instructor for discussion (15 pts) and to answer questions (15 pts).
+    </div>
+  </section>
+
+  <div class="footer-reset">
+    <a onclick="resetInstructor()">Reset (instructor use only)</a>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = "ioScenarioChoiceV1";
+
+const SCENARIOS = [
+  {
+    theme:"red",
+    badge:"⚙️ PROGRAMMED I/O",
+    number:"SCENARIO 1",
+    icons:"🏧",
+    title:"ATM Card Reader",
+    situation:"An ATM machine uses Programmed I/O to detect when a customer inserts their card.",
+    facts:[
+      "The card reader signals “ready” when a card is inserted",
+      "The CPU repeatedly checks (polls) the status every 10 milliseconds",
+      "When a card is detected, the CPU reads the card data",
+      "Then the ATM proceeds to process the transaction"
+    ],
+    questions:[
+      {q:"What is the CPU doing while waiting for a customer to insert a card?",
+       hint:"Think about what “polling” means — the CPU isn’t doing nothing, it’s repeating one action over and over."},
+      {q:"Is this a good use of the CPU's time? Why or why not?",
+       hint:"Compare how often the CPU checks (every 10ms) to how rarely a card actually gets inserted."},
+      {q:"If the polling interval is changed from 10ms to 1 second, what happens?",
+       hint:"A slower polling interval means the CPU reacts more slowly — what does that cost the customer?"},
+      {q:"What is the trade-off between CPU efficiency and response time?",
+       hint:"Faster polling means quicker response but more wasted CPU cycles; slower polling is the opposite."}
+    ]
+  },
+  {
+    theme:"red",
+    badge:"⚙️ PROGRAMMED I/O",
+    number:"SCENARIO 2",
+    icons:"🖨️",
+    title:"Dot-Matrix Printer",
+    situation:"A company has an old dot-matrix printer connected to a computer using Programmed I/O. They need to print a 100-page document. The CPU checks the printer status every 1 millisecond to see if it's ready for the next line.",
+    facts:[
+      "Document: 100 pages (10,000 lines total)",
+      "CPU checks: Every 1 millisecond",
+      "Printer speed: 5 lines per second",
+      "Each character transfer: Takes 2 milliseconds"
+    ],
+    questions:[
+      {q:"While the printer is working, what percentage of the time is the CPU actually busy doing useful work?",
+       hint:"Work out how many milliseconds pass between each line the printer can actually accept, then compare that to how often the CPU checks."},
+      {q:"Calculate: The CPU checks 1000 times per second, but the printer is only ready every how many milliseconds?",
+       hint:"The printer manages 5 lines per second — convert that into milliseconds per line first."},
+      {q:"What could the CPU be doing instead of polling the printer?",
+       hint:"Programmed I/O keeps the CPU stuck in a loop — what productive task is it not doing during that time?"},
+      {q:"Is this an efficient way to use the computer's CPU? Why or why not?",
+       hint:"Consider what percentage of the 10,000+ checks actually find the printer ready."}
+    ]
+  },
+  {
+    theme:"teal",
+    badge:"🔔 INTERRUPT-INITIATED I/O",
+    number:"SCENARIO 3",
+    icons:"⌨️📥",
+    title:"Keyboard + File Download",
+    situation:"A student is working on their computer downloading a large 10MB file. While the download is happening, they occasionally type on the keyboard. The system uses Interrupt-Initiated I/O.",
+    facts:[
+      "Background task: File download (10MB)",
+      "User action: Types occasionally (one keystroke every 2-3 seconds)",
+      "When key is pressed: Keyboard sends an interrupt signal",
+      "CPU response: Pauses download to handle the keystroke"
+    ],
+    questions:[
+      {q:"What is the CPU doing during those 2-3 seconds when the user is NOT typing?",
+       hint:"The download doesn't need the CPU to babysit it constantly — what is the CPU getting done in that gap?"},
+      {q:"Is this more efficient than Programmed I/O (constantly checking the keyboard)? Why?",
+       hint:"With Programmed I/O the CPU would have to keep checking the keyboard even when nothing is pressed — how often would that be, just in case?"},
+      {q:"When a key is pressed, what does \"interrupt\" mean? Does it stop the download?",
+       hint:"An interrupt signal briefly pauses the current task — does “pause” mean “cancel”?"},
+      {q:"Why is Interrupt-Initiated I/O perfect for keyboard input but maybe not for a fast network card?",
+       hint:"Keyboards send data rarely and slowly; a fast network card could send data thousands of times per second — what would constant interrupts do to the CPU?"}
+    ]
+  },
+  {
+    theme:"teal",
+    badge:"🔔 INTERRUPT-INITIATED I/O",
+    number:"SCENARIO 4",
+    icons:"🏥🚨",
+    title:"Hospital Emergency Alert System",
+    situation:"A hospital emergency alert system monitors patients in the ICU. If any patient's condition becomes critical, the system must alert doctors IMMEDIATELY. This is a life-or-death system.",
+    facts:[
+      "⚠ CRITICAL REQUIREMENT: Response time must be &lt; 100 milliseconds",
+      "Multiple sensors: 100+ patient monitors",
+      "Normal activity: System processes routine patient data",
+      "Emergency: ANY sensor detecting a critical condition sends an interrupt",
+      "Required response: &lt; 100 milliseconds (0.1 seconds)",
+      "Critical conditions: Heart stop, dangerous oxygen levels, etc."
+    ],
+    questions:[
+      {q:"Why would Programmed I/O be DANGEROUS in this hospital system?",
+       hint:"With Programmed I/O, the CPU checks patients one at a time in sequence — what happens to the others while it's busy checking just one?"},
+      {q:"If the CPU is checking patient #50 when patient #1 has a heart attack, how long until alert? Is this acceptable?",
+       hint:"Figure out how long a full round of checking all 100 monitors would take, even if each check is quick — is that under 100ms?"},
+      {q:"What is the BIG advantage of using Interrupt-Initiated I/O over Programmed I/O in a system like this?",
+       hint:"Interrupts let a sensor “speak up” immediately instead of waiting to be asked — how does that change response time?"},
+      {q:"Even with Interrupt-Initiated I/O, what could still go wrong if several patients had emergencies at the exact same millisecond?",
+       hint:"The CPU can normally only handle one interrupt at a time — what happens to the rest while it's busy with the first one?"}
+    ]
+  }
+];
+
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)); }
+  catch(e){ return null; }
+}
+function saveState(state){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ /* storage unavailable, state just won't persist across reloads */ }
+}
+
+function renderScenario(index){
+  const s = SCENARIOS[index];
+  const card = document.getElementById("scenarioCard");
+  card.className = "scenario-card show theme-" + s.theme;
+  document.getElementById("scBadge").textContent = s.badge;
+  document.getElementById("scNumber").textContent = s.number;
+  document.getElementById("scIcons").textContent = s.icons;
+  document.getElementById("scTitle").textContent = s.title;
+  document.getElementById("scSituation").textContent = s.situation;
+  document.getElementById("scFacts").innerHTML = s.facts
+    .map((f, i) => `<div class="fact${i === 0 && s.theme === 'teal' && s.facts[0].indexOf('CRITICAL') > -1 ? ' warn' : ''}">${f}</div>`)
+    .join("");
+
+  document.getElementById("drawBtn").style.display = "none";
+  document.getElementById("dice").style.display = "none";
+  document.getElementById("lockedTag").innerHTML = "<span class=\"locked-tag\">🔒 Scenario locked in — this is your assigned question</span>";
+  document.getElementById("discussionGate").style.display = "block";
+}
+
+function renderDiscussion(index, hintsShown){
+  const s = SCENARIOS[index];
+  const stage = document.getElementById("discussionStage");
+  stage.innerHTML = "<h3>Discuss These Questions</h3>" + s.questions.map((item, i) => `
+    <div class="q-block">
+      <div class="q-head">
+        <div class="q-num">${i + 1}</div>
+        <div class="q-text">${item.q}</div>
+      </div>
+      <div class="hint-area">
+        <button class="hint-btn" id="hintBtn${i}" onclick="revealHint(${i})" ${hintsShown[i] ? "disabled" : ""}>${hintsShown[i] ? "Hint shown" : "💡 Hint"}</button>
+        <div class="hint-text${hintsShown[i] ? " show" : ""}" id="hintText${i}">${item.hint}</div>
+      </div>
+    </div>
+  `).join("");
+  stage.style.display = "block";
+}
+
+function drawScenario(){
+  const existing = loadState();
+  if(existing && existing.scenarioIndex !== null && existing.scenarioIndex !== undefined) return;
+
+  const dice = document.getElementById("dice");
+  dice.classList.add("rolling");
+  document.getElementById("drawBtn").disabled = true;
+
+  setTimeout(() => {
+    const index = Math.floor(Math.random() * SCENARIOS.length);
+    const state = {scenarioIndex:index, discussionShown:false, hintsShown:[false,false,false,false]};
+    saveState(state);
+    renderScenario(index);
+  }, 550);
+}
+
+function revealDiscussion(){
+  const state = loadState();
+  if(!state) return;
+  state.discussionShown = true;
+  saveState(state);
+  renderDiscussion(state.scenarioIndex, state.hintsShown);
+  document.getElementById("discussionGate").style.display = "none";
+  document.getElementById("readyNote").style.display = "block";
+}
+
+function revealHint(i){
+  const state = loadState();
+  if(!state) return;
+  state.hintsShown[i] = true;
+  saveState(state);
+  document.getElementById("hintText" + i).classList.add("show");
+  const btn = document.getElementById("hintBtn" + i);
+  btn.disabled = true;
+  btn.textContent = "Hint shown";
+}
+
+const RESET_PASSCODE = "admin";
+
+function resetInstructor(){
+  const entered = prompt("Enter the instructor passcode to reset this device:");
+  if(entered === null) return;
+  if(entered !== RESET_PASSCODE){
+    alert("Incorrect passcode. Reset cancelled.");
+    return;
+  }
+  if(!confirm("Reset this device so a new student can draw a fresh scenario?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+(function init(){
+  const state = loadState();
+  if(state && state.scenarioIndex !== null && state.scenarioIndex !== undefined){
+    renderScenario(state.scenarioIndex);
+    if(state.discussionShown){
+      renderDiscussion(state.scenarioIndex, state.hintsShown);
+      document.getElementById("discussionGate").style.display = "none";
+      document.getElementById("readyNote").style.display = "block";
+    }
+  }
+})();
+</script>
+</body>
+</html>
