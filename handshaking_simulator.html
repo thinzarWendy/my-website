@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Handshaking Protocol Simulator</title>
+<style>
+  :root{
+    --surface-1:#f8fafc;
+    --surface-2:#f1f5f9;
+    --border:#cbd5e1;
+    --border-strong:#94a3b8;
+    --border-stronger:#64748b;
+    --border-accent:#3b82f6;
+    --fill-accent:#2563eb;
+    --fill-accent-hover:#1d4ed8;
+    --text-primary:#172033;
+    --text-accent:#1d4ed8;
+    --bg-accent:#dbeafe;
+    --bg-success:#d1fae5;
+    --text-success:#059669;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eef3f8;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .title {
+    text-align: center;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #000;
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .simulator {
+    background: var(--surface-1);
+    border: 2px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .units-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .unit {
+    flex: 1;
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    margin: 0 10px;
+  }
+
+  .unit.sender {
+    border-color: #1976D2;
+    background: #E3F2FD;
+  }
+
+  .unit.receiver {
+    border-color: #388E3C;
+    background: #E8F5E9;
+  }
+
+  .unit-name {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 8px;
+  }
+
+  .sender .unit-name { color: #1976D2; }
+  .receiver .unit-name { color: #388E3C; }
+
+  .unit-status {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+    min-height: 30px;
+  }
+
+  .status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .status-indicator.idle { background: #999; }
+  .status-indicator.active { background: #FF9800; }
+  .status-indicator.success { background: #4CAF50; }
+
+  .data-display {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 10px;
+    border-radius: 6px;
+    font-family: monospace;
+    font-size: 14px;
+    color: #333;
+    min-height: 24px;
+  }
+
+  .signals {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid var(--border-accent);
+  }
+
+  .signal-line {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+    font-size: 13px;
+  }
+
+  .signal-name {
+    width: 120px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .signal-state {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .signal-indicator {
+    width: 30px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: white;
+    font-family: monospace;
+  }
+
+  .signal-indicator.high {
+    background: #FF9800;
+  }
+
+  .signal-indicator.low {
+    background: #CCC;
+    color: #333;
+  }
+
+  .signal-label {
+    font-size: 12px;
+    color: #666;
+  }
+
+  .log {
+    background: #1a1a1a;
+    color: #0F0;
+    border-radius: 6px;
+    padding: 15px;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    height: 200px;
+    overflow-y: auto;
+    margin: 20px 0;
+    border: 1px solid #333;
+  }
+
+  .log-entry {
+    line-height: 1.6;
+    padding: 2px 0;
+  }
+
+  .log-time {
+    color: #888;
+    margin-right: 8px;
+  }
+
+  .log-sender {
+    color: #4DA6FF;
+  }
+
+  .log-receiver {
+    color: #66BB6A;
+  }
+
+  .log-data {
+    color: #FFB74D;
+  }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 13px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--fill-accent);
+    color: white;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  button:hover:not(:disabled) {
+    background: var(--fill-accent-hover);
+    transform: translateY(-1px);
+  }
+
+  button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  button.secondary {
+    background: var(--border-strong);
+    color: var(--text-primary);
+  }
+
+  button.secondary:hover:not(:disabled) {
+    background: var(--border-stronger);
+  }
+
+  .transfer-step {
+    background: var(--surface-2);
+    border-left: 4px solid var(--border-accent);
+    padding: 10px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+    font-size: 13px;
+  }
+
+  .transfer-step.active {
+    background: var(--bg-accent);
+    border-left-color: var(--text-accent);
+  }
+
+  .transfer-step.completed {
+    background: var(--bg-success);
+    border-left-color: var(--text-success);
+  }
+
+  .bytes-input {
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+    width: 150px;
+  }
+
+  .info-box {
+    background: var(--bg-accent);
+    border: 1px solid var(--border-accent);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 12px;
+    color: var(--text-accent);
+    margin-bottom: 15px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="title">🤝 Handshaking Protocol Simulator</div>
+  <div class="subtitle">Real-time visualization of bidirectional data transfer</div>
+
+  <div class="simulator">
+    <!-- Input section -->
+    <div class="info-box">
+      ℹ️ Enter binary data (8 bits max) or use the example. Click "Transfer" to send.
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+      <input type="text" id="dataInput" class="bytes-input" placeholder="e.g., 10110101" maxlength="8" value="10110101">
+      <button onclick="validateAndTransfer()">↓ Transfer Data</button>
+      <button class="secondary" onclick="resetSimulator()">⟲ Reset</button>
+      <button class="secondary" onclick="randomData()">🎲 Random</button>
+    </div>
+
+    <!-- Units display -->
+    <div class="units-row">
+      <div class="unit sender">
+        <div class="unit-name">📤 SENDER</div>
+        <div class="unit-status">
+          <span class="status-indicator" id="senderStatus"></span>
+          <span id="senderStatusText">Idle</span>
+        </div>
+        <div>Data to send:</div>
+        <div class="data-display" id="senderData">-</div>
+      </div>
+
+      <div style="flex: 1; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+          <div style="font-size: 12px; color: #999; margin-bottom: 20px;">communication</div>
+          <div style="font-size: 24px; margin-bottom: 20px;">↔</div>
+          <div style="font-size: 12px; color: #999;">handshake</div>
+        </div>
+      </div>
+
+      <div class="unit receiver">
+        <div class="unit-name">📥 RECEIVER</div>
+        <div class="unit-status">
+          <span class="status-indicator" id="receiverStatus"></span>
+          <span id="receiverStatusText">Idle</span>
+        </div>
+        <div>Data received:</div>
+        <div class="data-display" id="receiverData">-</div>
+      </div>
+    </div>
+
+    <!-- Signals display -->
+    <div class="signals">
+      <div style="font-weight: bold; margin-bottom: 12px;">📡 Control Signals</div>
+      
+      <div class="signal-line">
+        <div class="signal-name">DATA BUS:</div>
+        <div class="signal-state">
+          <div class="signal-indicator low" id="dataBusIndicator">LOW</div>
+          <div class="signal-label" id="dataBusLabel">No data</div>
+        </div>
+      </div>
+
+      <div class="signal-line">
+        <div class="signal-name">DATA READY:</div>
+        <div class="signal-state">
+          <div class="signal-indicator low" id="dataReadyIndicator">LOW</div>
+          <div class="signal-label" id="dataReadyLabel">Not asserted</div>
+        </div>
+      </div>
+
+      <div class="signal-line">
+        <div class="signal-name">ACK (Acknowledge):</div>
+        <div class="signal-state">
+          <div class="signal-indicator low" id="ackIndicator">LOW</div>
+          <div class="signal-label" id="ackLabel">Not asserted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transfer steps -->
+    <div style="margin-top: 20px;">
+      <div style="font-weight: bold; margin-bottom: 10px;">📋 Transfer Steps</div>
+      <div id="stepsContainer"></div>
+    </div>
+
+    <!-- System log -->
+    <div style="font-weight: bold; margin-top: 20px;">📊 System Log</div>
+    <div class="log" id="systemLog"></div>
+  </div>
+</div>
+
+<script>
+let transferInProgress = false;
+let logEntries = [];
+
+const steps = [
+  "Sender prepares data on bus",
+  "Sender asserts DATA READY signal",
+  "Receiver detects DATA READY signal",
+  "Receiver reads data from bus",
+  "Receiver asserts ACK signal",
+  "Sender receives ACK confirmation",
+  "Transfer complete - signals released"
+];
+
+function addLog(type, message) {
+  const timestamp = new Date().toLocaleTimeString();
+  logEntries.push({ type, message, timestamp });
+  if (logEntries.length > 20) logEntries.shift();
+  updateLog();
+}
+
+function updateLog() {
+  const logDiv = document.getElementById('systemLog');
+  logDiv.innerHTML = logEntries.map(entry => {
+    const className = entry.type === 'sender' ? 'log-sender' : entry.type === 'receiver' ? 'log-receiver' : 'log-data';
+    return `<div class="log-entry"><span class="log-time">[${entry.timestamp}]</span><span class="${className}">${entry.message}</span></div>`;
+  }).join('');
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function setStatus(element, status, text) {
+  const indicator = document.getElementById(element);
+  indicator.className = `status-indicator ${status}`;
+  document.getElementById(element + 'Text').textContent = text;
+}
+
+function setSignal(signal, state, label) {
+  const indicator = document.getElementById(signal + 'Indicator');
+  indicator.className = `signal-indicator ${state === 'HIGH' ? 'high' : 'low'}`;
+  indicator.textContent = state;
+  document.getElementById(signal + 'Label').textContent = label;
+}
+
+function setStep(stepNum, status) {
+  const container = document.getElementById('stepsContainer');
+  const stepsHTML = steps.map((step, idx) => {
+    let className = 'transfer-step';
+    if (idx < stepNum) className += ' completed';
+    else if (idx === stepNum) className += ' active';
+    return `<div class="${className}">Step ${idx + 1}: ${step}</div>`;
+  }).join('');
+  container.innerHTML = stepsHTML;
+}
+
+async function performHandshake(data) {
+  transferInProgress = true;
+  addLog('sender', `INITIATING HANDSHAKE with data: ${data}`);
+
+  // Step 1: Prepare data
+  setStep(0, 'active');
+  document.getElementById('senderData').textContent = data;
+  setStatus('senderStatus', 'active', 'Preparing data');
+  addLog('sender', `Data placed on bus: ${data}`);
+  await sleep(800);
+
+  // Step 2: Sender asserts DATA READY
+  setStep(1, 'active');
+  setSignal('dataBus', 'HIGH', `Data valid: ${data}`);
+  setSignal('dataReady', 'HIGH', 'Signal asserted by sender');
+  setStatus('senderStatus', 'active', 'Asserting DATA READY');
+  addLog('sender', `DATA READY signal asserted (HIGH)`);
+  await sleep(1000);
+
+  // Step 3: Receiver detects signal
+  setStep(2, 'active');
+  setStatus('receiverStatus', 'active', 'Detecting signal');
+  addLog('receiver', `Detected DATA READY signal`);
+  await sleep(800);
+
+  // Step 4: Receiver reads data
+  setStep(3, 'active');
+  document.getElementById('receiverData').textContent = data;
+  setStatus('receiverStatus', 'success', 'Data captured');
+  addLog('receiver', `Data successfully read: ${data}`);
+  await sleep(1000);
+
+  // Step 5: Receiver asserts ACK
+  setStep(4, 'active');
+  setSignal('ack', 'HIGH', 'Acknowledge signal sent');
+  setStatus('receiverStatus', 'success', 'Sending ACK');
+  addLog('receiver', `ACK signal asserted (HIGH)`);
+  await sleep(1000);
+
+  // Step 6: Sender receives ACK
+  setStep(5, 'active');
+  setStatus('senderStatus', 'success', 'ACK received');
+  addLog('sender', `ACK signal received - transfer successful!`);
+  await sleep(1000);
+
+  // Step 7: Complete and release signals
+  setStep(6, 'active');
+  setSignal('dataBus', 'LOW', 'Data bus released');
+  setSignal('dataReady', 'LOW', 'Signal released');
+  setSignal('ack', 'LOW', 'Signal released');
+  addLog('data', `Transfer complete! Signals released.`);
+  await sleep(500);
+
+  setStatus('senderStatus', 'idle', 'Ready for next transfer');
+  setStatus('receiverStatus', 'idle', 'Ready for next transfer');
+  
+  transferInProgress = false;
+  addLog('data', `═══ HANDSHAKE CYCLE COMPLETE ═══`);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function validateAndTransfer() {
+  const input = document.getElementById('dataInput').value.trim();
+  
+  if (!input) {
+    alert('Please enter binary data (e.g., 10110101)');
+    return;
+  }
+
+  if (!/^[01]{1,8}$/.test(input)) {
+    alert('Please enter only 1-8 binary digits (0 or 1)');
+    return;
+  }
+
+  if (transferInProgress) {
+    alert('Transfer already in progress');
+    return;
+  }
+
+  performHandshake(input);
+}
+
+function randomData() {
+  const bits = Math.floor(Math.random() * 8) + 1;
+  let data = '';
+  for (let i = 0; i < bits; i++) {
+    data += Math.floor(Math.random() * 2);
+  }
+  document.getElementById('dataInput').value = data;
+}
+
+function resetSimulator() {
+  if (transferInProgress) {
+    alert('Please wait for transfer to complete');
+    return;
+  }
+
+  document.getElementById('dataInput').value = '10110101';
+  document.getElementById('senderData').textContent = '-';
+  document.getElementById('receiverData').textContent = '-';
+  
+  setStatus('senderStatus', 'idle', 'Idle');
+  setStatus('receiverStatus', 'idle', 'Idle');
+  
+  setSignal('dataBus', 'LOW', 'No data');
+  setSignal('dataReady', 'LOW', 'Not asserted');
+  setSignal('ack', 'LOW', 'Not asserted');
+  
+  document.getElementById('stepsContainer').innerHTML = steps.map((step, idx) => 
+    `<div class="transfer-step">Step ${idx + 1}: ${step}</div>`
+  ).join('');
+  
+  logEntries = [];
+  updateLog();
+}
+
+// Initialize
+resetSimulator();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strobe Control Protocol Simulator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .info-box {
+      background: #E8F5E9;
+      border-left: 4px solid #4CAF50;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #1B5E20;
+    }
+
+    .controls-section {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+
+    .input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="text"] {
+      padding: 10px 14px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      width: 150px;
+      transition: border-color 0.3s;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button.primary {
+      background: #667eea;
+      color: white;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    button.secondary {
+      background: #f0f0f0;
+      color: #333;
+      border: 1px solid #ddd;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: #e8e8e8;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .units-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .unit {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      border: 2px solid #ddd;
+    }
+
+    .unit.sender {
+      border-color: #1976D2;
+      background: #E3F2FD;
+    }
+
+    .unit.receiver {
+      border-color: #388E3C;
+      background: #E8F5E9;
+    }
+
+    .unit-name {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sender .unit-name { color: #1976D2; }
+    .receiver .unit-name { color: #388E3C; }
+
+    .status-line {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 12px;
+      min-height: 20px;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .status-indicator.idle { background: #999; }
+    .status-indicator.active { background: #FF9800; animation: pulse 1s infinite; }
+    .status-indicator.success { background: #4CAF50; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .data-label {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .data-display {
+      background: white;
+      border: 2px solid #ddd;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 15px;
+      font-weight: bold;
+      min-height: 30px;
+      display: flex;
+      align-items: center;
+    }
+
+    .sender .data-display { color: #1976D2; border-color: #1976D2; }
+    .receiver .data-display { color: #388E3C; border-color: #388E3C; }
+
+    .signals-section {
+      background: #f9f9f9;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      margin-bottom: 30px;
+    }
+
+    .signals-title {
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .signal-line {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 10px;
+      background: white;
+      border-radius: 6px;
+    }
+
+    .signal-name {
+      width: 140px;
+      font-weight: 500;
+      font-size: 13px;
+      color: #333;
+    }
+
+    .signal-indicator {
+      width: 40px;
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: white;
+      font-family: monospace;
+      margin-right: 12px;
+    }
+
+    .signal-indicator.high {
+      background: #FF9800;
+    }
+
+    .signal-indicator.low {
+      background: #CCC;
+      color: #333;
+    }
+
+    .signal-label {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .steps-section {
+      margin-bottom: 30px;
+    }
+
+    .steps-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .step {
+      background: white;
+      border-left: 4px solid #ddd;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .step.active {
+      background: #FFF3E0;
+      border-left-color: #FF9800;
+    }
+
+    .step.completed {
+      background: #E8F5E9;
+      border-left-color: #4CAF50;
+    }
+
+    .log-section {
+      margin-bottom: 20px;
+    }
+
+    .log-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .log {
+      background: #1a1a1a;
+      color: #0F0;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      height: 200px;
+      overflow-y: auto;
+      border: 1px solid #333;
+    }
+
+    .log-entry {
+      line-height: 1.6;
+      padding: 2px 0;
+    }
+
+    .log-time {
+      color: #888;
+      margin-right: 8px;
+    }
+
+    .log-sender {
+      color: #4DA6FF;
+    }
+
+    .log-receiver {
+      color: #66BB6A;
+    }
+
+    .log-data {
+      color: #FFB74D;
+    }
+
+    @media (max-width: 768px) {
+      .units-section {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      input[type="text"] {
+        width: 120px;
+      }
+    }
+
+    /* Scrollbar styling */
+    .log::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .log::-webkit-scrollbar-track {
+      background: #2a2a2a;
+      border-radius: 4px;
+    }
+
+    .log::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 4px;
+    }
+
+    .log::-webkit-scrollbar-thumb:hover {
+      background: #777;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📤 Strobe Control Protocol Simulator</h1>
+    <p>One-way signaling with strobing pulse - Sender controls timing</p>
+  </div>
+
+  <div class="content">
+    <div class="info-box">
+      ℹ️ Enter binary data (8 bits max) and click "Transfer Data" to see the complete strobe control cycle in action.
+    </div>
+
+    <div class="controls-section">
+      <div class="input-group">
+        <input type="text" id="dataInput" placeholder="e.g., 10110101" maxlength="8" value="10110101">
+        <button class="primary" onclick="validateAndTransfer()">↓ Transfer Data</button>
+        <button class="secondary" onclick="resetSimulator()">⟲ Reset</button>
+        <button class="secondary" onclick="randomData()">🎲 Random</button>
+      </div>
+    </div>
+
+    <div class="units-section">
+      <div class="unit sender">
+        <div class="unit-name">📤 SENDER</div>
+        <div class="status-line">
+          <span class="status-indicator" id="senderStatus"></span>
+          <span id="senderStatusText">Idle</span>
+        </div>
+        <div class="data-label">Data to send:</div>
+        <div class="data-display" id="senderData">-</div>
+      </div>
+
+      <div class="unit receiver">
+        <div class="unit-name">📥 RECEIVER</div>
+        <div class="status-line">
+          <span class="status-indicator" id="receiverStatus"></span>
+          <span id="receiverStatusText">Idle</span>
+        </div>
+        <div class="data-label">Data received:</div>
+        <div class="data-display" id="receiverData">-</div>
+      </div>
+    </div>
+
+    <div class="signals-section">
+      <div class="signals-title">📡 Control Signals</div>
+      
+      <div class="signal-line">
+        <div class="signal-name">DATA BUS:</div>
+        <div class="signal-indicator low" id="dataBusIndicator">LOW</div>
+        <div class="signal-label" id="dataBusLabel">No data on bus</div>
+      </div>
+
+      <div class="signal-line">
+        <div class="signal-name">STROBE PULSE:</div>
+        <div class="signal-indicator low" id="strobeIndicator">LOW</div>
+        <div class="signal-label" id="strobeLabel">Pulse not active</div>
+      </div>
+    </div>
+
+    <div class="steps-section">
+      <div class="steps-title">📋 Transfer Steps</div>
+      <div id="stepsContainer"></div>
+    </div>
+
+    <div class="log-section">
+      <div class="log-title">📊 System Log</div>
+      <div class="log" id="systemLog"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let transferInProgress = false;
+let logEntries = [];
+
+const steps = [
+  "Sender prepares data",
+  "Sender places data on bus",
+  "Sender asserts STROBE pulse (goes HIGH)",
+  "Receiver detects STROBE pulse",
+  "Receiver captures data from bus",
+  "Sender releases STROBE pulse (goes LOW)",
+  "Transfer complete - data removed"
+];
+
+function addLog(type, message) {
+  const timestamp = new Date().toLocaleTimeString();
+  logEntries.push({ type, message, timestamp });
+  if (logEntries.length > 25) logEntries.shift();
+  updateLog();
+}
+
+function updateLog() {
+  const logDiv = document.getElementById('systemLog');
+  logDiv.innerHTML = logEntries.map(entry => {
+    const className = entry.type === 'sender' ? 'log-sender' : entry.type === 'receiver' ? 'log-receiver' : 'log-data';
+    return `<div class="log-entry"><span class="log-time">[${entry.timestamp}]</span><span class="${className}">${entry.message}</span></div>`;
+  }).join('');
+  logDiv.scrollTop = logDiv.scrollHeight;
+}
+
+function setStatus(element, status, text) {
+  const indicator = document.getElementById(element);
+  indicator.className = `status-indicator ${status}`;
+  document.getElementById(element + 'Text').textContent = text;
+}
+
+function setSignal(signal, state, label) {
+  const indicator = document.getElementById(signal + 'Indicator');
+  indicator.className = `signal-indicator ${state === 'HIGH' ? 'high' : 'low'}`;
+  indicator.textContent = state;
+  document.getElementById(signal + 'Label').textContent = label;
+}
+
+function setStep(stepNum) {
+  const container = document.getElementById('stepsContainer');
+  const stepsHTML = steps.map((step, idx) => {
+    let className = 'step';
+    if (idx < stepNum) className += ' completed';
+    else if (idx === stepNum) className += ' active';
+    return `<div class="${className}">Step ${idx + 1}: ${step}</div>`;
+  }).join('');
+  container.innerHTML = stepsHTML;
+}
+
+async function performStrobeTransfer(data) {
+  transferInProgress = true;
+  addLog('data', `═══ INITIATING STROBE TRANSFER ═══`);
+  addLog('sender', `Preparing to send: ${data}`);
+
+  // Step 1: Prepare data
+  setStep(0);
+  document.getElementById('senderData').textContent = data;
+  setStatus('senderStatus', 'active', 'Preparing data');
+  addLog('sender', `Data prepared: ${data}`);
+  await sleep(900);
+
+  // Step 2: Place data on bus
+  setStep(1);
+  setSignal('dataBus', 'HIGH', `Data on bus: ${data}`);
+  setStatus('senderStatus', 'active', 'Data placed on bus');
+  addLog('sender', `Placed data on bus: ${data}`);
+  await sleep(900);
+
+  // Step 3: Assert STROBE pulse
+  setStep(2);
+  setSignal('strobe', 'HIGH', 'STROBE pulse asserted');
+  setStatus('senderStatus', 'active', 'STROBE pulse ON');
+  addLog('sender', `STROBE PULSE asserted (signal goes HIGH)`);
+  addLog('data', `⚡ Pulse transmitted to receiver...`);
+  await sleep(1300);
+
+  // Step 4: Receiver detects pulse
+  setStep(3);
+  setStatus('receiverStatus', 'active', 'Pulse detected!');
+  addLog('receiver', `STROBE pulse detected!`);
+  addLog('receiver', `Beginning data capture...`);
+  await sleep(800);
+
+  // Step 5: Receiver captures data
+  setStep(4);
+  document.getElementById('receiverData').textContent = data;
+  setStatus('receiverStatus', 'success', 'Data captured');
+  addLog('receiver', `✓ Data successfully captured: ${data}`);
+  addLog('receiver', `Data latched into memory`);
+  await sleep(1100);
+
+  // Step 6: Sender releases STROBE
+  setStep(5);
+  setSignal('strobe', 'LOW', 'STROBE pulse released');
+  setSignal('dataBus', 'LOW', 'Data bus cleared');
+  setStatus('senderStatus', 'success', 'STROBE released');
+  addLog('sender', `STROBE PULSE released (signal goes LOW)`);
+  addLog('sender', `Data removed from bus`);
+  await sleep(1000);
+
+  // Step 7: Complete
+  setStep(6);
+  setStatus('senderStatus', 'idle', 'Ready for next byte');
+  setStatus('receiverStatus', 'idle', 'Ready for next byte');
+  
+  transferInProgress = false;
+  addLog('data', `✓ STROBE CONTROL TRANSFER COMPLETE!`);
+  addLog('data', `═════════════════════════════════`);
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function validateAndTransfer() {
+  const input = document.getElementById('dataInput').value.trim();
+  
+  if (!input) {
+    alert('Please enter binary data (e.g., 10110101)');
+    return;
+  }
+
+  if (!/^[01]{1,8}$/.test(input)) {
+    alert('Please enter only 1-8 binary digits (0 or 1)');
+    return;
+  }
+
+  if (transferInProgress) {
+    alert('Transfer already in progress. Please wait...');
+    return;
+  }
+
+  performStrobeTransfer(input);
+}
+
+function randomData() {
+  const bits = Math.floor(Math.random() * 8) + 1;
+  let data = '';
+  for (let i = 0; i < bits; i++) {
+    data += Math.floor(Math.random() * 2);
+  }
+  document.getElementById('dataInput').value = data;
+  addLog('data', `Random data generated: ${data}`);
+}
+
+function resetSimulator() {
+  if (transferInProgress) {
+    alert('Please wait for transfer to complete');
+    return;
+  }
+
+  document.getElementById('dataInput').value = '10110101';
+  document.getElementById('senderData').textContent = '-';
+  document.getElementById('receiverData').textContent = '-';
+  
+  setStatus('senderStatus', 'idle', 'Idle');
+  setStatus('receiverStatus', 'idle', 'Idle');
+  
+  setSignal('dataBus', 'LOW', 'No data on bus');
+  setSignal('strobe', 'LOW', 'Pulse not active');
+  
+  document.getElementById('stepsContainer').innerHTML = steps.map((step, idx) => 
+    `<div class="step">Step ${idx + 1}: ${step}</div>`
+  ).join('');
+  
+  logEntries = [];
+  updateLog();
+  addLog('data', `System reset and ready for new transfer`);
+}
+
+// Initialize on page load
+window.addEventListener('load', () => {
+  resetSimulator();
+});
+</script>
+
+</body>
+</html>
