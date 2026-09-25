@@ -69,8 +69,9 @@ td,th{border:1px solid #d1dbea;padding:7px;text-align:left;vertical-align:top}th
 <body>
 <div class="watermark">Dr. Surekha Lanka @2026 Java Programming Class</div>
 <main class="wrap">
-<h1>Game Quest — Java Adventure Game</h1>
+<h1>Game Quest — Java Adventure Game <span class="small muted">(Version 2)</span></h1>
 <p class="muted">Write real Java code and run it right here in your browser. Your program's output drives the Game Screen: print game commands such as <code>@HEALTH 80</code> and the page animates them.</p>
+<p class="small">Version 2 adds two tasks to the original project: storing quest data in an array or ArrayList, and using inheritance so each character type behaves a little differently.</p>
 <p class="small">This page uses Java 8. Avoid newer features such as <code>var</code>, records, text blocks and <code>switch -&gt;</code>. The first run downloads Java into your browser and can take up to a minute.</p>
 
 <div class="panel"><div class="grid"><div><label for="name">Student name</label><input id="name" placeholder="Your name"></div><div><label for="id">Student ID</label><input id="id" placeholder="Your student ID"></div></div></div>
@@ -133,7 +134,7 @@ td,th{border:1px solid #d1dbea;padding:7px;text-align:left;vertical-align:top}th
 
 <div class="panel"><h2>Testing and explanation</h2>
 <label for="tests">Three tests: inputs, expected result, actual result</label><textarea id="tests" rows="5" placeholder="Test 1: ...&#10;Test 2: ...&#10;Test 3: ..."></textarea>
-<label for="explanation">Explain your class, methods, Random, Boolean logic, Math methods and personal feature</label><textarea id="explanation" rows="5" placeholder="Explain what your own code does."></textarea>
+<label for="explanation">Explain your class, methods, Random, Boolean logic, Math methods, array/ArrayList, inheritance and personal feature</label><textarea id="explanation" rows="5" placeholder="Explain what your own code does."></textarea>
 <button type="button" id="downloadWork" class="secondary">Download my submission (.json)</button></div>
 
 <p class="small">Privacy: your code runs inside your own browser and is not sent to a compiler server. Name and ID stay in this browser unless you download or share a submission. Drafts are stored in this browser, so download your work before changing computers or clearing browser data.</p>
@@ -149,7 +150,9 @@ const steps=[
  ['4 — Random challenge','Use Random to choose a challenge or difficulty. Ask the player to select Attack, Run, or Use magic. Print @CHALLENGE, @ACTION and the new @HEALTH / @POINTS. Try @DICE or @COIN for random luck.'],
  ['5 — Boolean decisions','Use meaningful Boolean expressions and if-else, for example health > 0 && points >= 50, to decide whether to continue or show Game Over.'],
  ['6 — Math methods','Use at least two Math methods such as Math.round(), Math.max(), Math.min(), Math.sqrt(), or Math.pow() for a meaningful game calculation.'],
- ['7 — Final result','Display player, character, type, health, points, challenges completed, final level, and a win/lose result. Print @RESULT WIN or @RESULT LOSE. Add and explain one personal game feature. Test at least three input situations.']
+ ['7 — Array or ArrayList','Store something that grows during the quest in an array or ArrayList, for example items collected, challenges faced, or points earned each round. Use a for-each loop to read it back and print a short summary before the final result.'],
+ ['8 — Inheritance and polymorphism','Create at least one subclass of Character, such as Warrior, Wizard, or Archer, that extends Character and overrides a method (for example attack() or specialMove()) so it behaves differently for that type.'],
+ ['9 — Final result','Display player, character, type, health, points, challenges completed, final level, and a win/lose result. Print @RESULT WIN or @RESULT LOSE. Add and explain one personal game feature. Test at least three input situations.']
 ];
 const $=id=>document.getElementById(id);let current=0;
 function showStep(){const [t,x]=steps[current];$('stepCount').textContent=`Task ${current+1} of ${steps.length}`;$('stepTitle').textContent=t;$('stepText').textContent=x;$('previous').disabled=current===0;$('next').disabled=current===steps.length-1}
