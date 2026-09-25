@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Obstacle Runner — Write, Run and See Your Java Game</title>
+<style>
+:root{font-family:Arial,sans-serif;color:#18243b;background:#eef2f8;--navy:#193860;--gold:#f5b700;--green:#147d46;--red:#c0392b;--amber:#d98b00}
+*{box-sizing:border-box}body{margin:0}
+.wrap{max-width:1150px;margin:26px auto;padding:25px;background:#fff;border-radius:12px;box-shadow:0 5px 24px #1a32501c}
+h1{margin:0;color:var(--navy)}h2{font-size:1.25rem;color:var(--navy);margin:0 0 12px}
+.muted{color:#536277}.small{font-size:.92rem;color:#536277}
+.panel{border:1px solid #d1dbea;border-radius:9px;padding:20px;margin:18px 0}
+.task{background:#f5f3ff;border-left:5px solid #7142bd}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+label{display:block;font-weight:700;margin:12px 0 6px}
+input,textarea{width:100%;padding:10px;border:1px solid #aab9cd;border-radius:6px;font:inherit}
+textarea{resize:vertical}
+#code{min-height:380px;font:14px/1.55 Consolas,Monaco,monospace;tab-size:4}
+#stdin{min-height:145px;font:14px/1.5 Consolas,monospace}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#101e33;color:#e4ecfa;border-radius:8px;padding:15px;min-height:145px;margin:0}
+button{border:0;background:#234f8d;color:#fff;padding:11px 17px;margin:7px 7px 7px 0;border-radius:6px;cursor:pointer;font-weight:bold}
+button:disabled{opacity:.55;cursor:wait}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #f5b700;outline-offset:2px}
+.secondary{background:#475569}.play{background:var(--green)}
+.stepnav{display:flex;justify-content:space-between;gap:10px}
+#status{font-weight:700;color:#284d77}
+code{background:#eef2f8;padding:1px 5px;border-radius:4px}
+
+/* Game screen */
+.screen{display:grid;grid-template-columns:1.25fr 1fr;gap:15px}
+.stage{position:relative;min-height:330px;border-radius:10px;padding:18px;color:#eaf2ff;background:#16304f;overflow:hidden}
+.runner-head h3{margin:0;font-size:1.25rem}.runner-head p{margin:3px 0 0;color:#b9cde6}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.stat{background:#20426a;border-radius:8px;padding:8px;text-align:center;font-size:.85rem;color:#b9cde6}
+.stat strong{display:block;font-size:1.35rem;color:#fff}
+.stat strong.bump{animation:bump .45s}@keyframes bump{50%{transform:scale(1.35);color:var(--gold)}}
+.track-wrap{position:relative;height:130px;margin-top:6px;background:linear-gradient(#1c3a5e,#16304f);border-radius:10px;overflow:hidden;border:1px solid #2c507c}
+.track-ground{position:absolute;left:0;right:0;bottom:0;height:28px;background:#3a2c1f;border-top:3px solid #5c4530}
+.finish-flag{position:absolute;bottom:24px;right:8px;font-size:1.7rem}
+.start-line{position:absolute;bottom:24px;left:8px;font-size:.78rem;color:#8fb0d6}
+.barrier{position:absolute;bottom:28px;width:14px;height:32px;margin-left:-7px;background:linear-gradient(#e79a2e,var(--amber));border-radius:3px 3px 0 0;box-shadow:0 0 0 1px #7a4a0a inset}
+.runner-pos{position:absolute;bottom:28px;left:0;transition:left .4s ease}
+.runner{width:36px;height:36px;margin-left:-18px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bfe6ff,#2f6fb0 65%,#1c4a78);border:3px solid #cfe9ff}
+.runner.jump{animation:hop .5s ease}
+@keyframes hop{0%{transform:translateY(0)}35%{transform:translateY(-46px)}65%{transform:translateY(-46px)}100%{transform:translateY(0)}}
+.runner.hit{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-7px)}50%{transform:translateX(7px)}75%{transform:translateX(-4px)}}
+.result{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;font-size:2rem;font-weight:800}
+.result.show{display:flex}.result small{font-size:1rem;font-weight:400;margin-top:8px}
+.result.win{background:#147d46ee}.result.lose{background:#8e2a20ee}
+.log{background:#f6f8fc;border:1px solid #d1dbea;border-radius:10px;padding:12px;height:330px;overflow:auto;margin:0;list-style:none}
+.log li{padding:6px 4px;border-bottom:1px dashed #d1dbea;font-size:.93rem}
+.log li.warn{color:#9a4a00}
+details summary{cursor:pointer;font-weight:700;color:var(--navy)}
+table{border-collapse:collapse;width:100%;margin-top:10px;font-size:.92rem}
+td,th{border:1px solid #d1dbea;padding:7px;text-align:left;vertical-align:top}th{background:#eef2f8}
+.watermark{position:fixed;z-index:9999;right:14px;bottom:12px;padding:8px 12px;border:1px solid rgba(16,42,67,.2);border-radius:7px;background:rgba(255,255,255,.8);color:rgba(16,42,67,.7);font-size:.78rem;font-weight:bold;pointer-events:none;user-select:none}
+@media(max-width:760px){.grid,.screen{grid-template-columns:1fr}.wrap{margin:0;padding:14px;border-radius:0}.log{height:220px}.watermark{font-size:.67rem;right:7px;bottom:7px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media print{button{display:none}body{background:#fff}.wrap{box-shadow:none}}
+#console,#cjDisplay{display:none}
+</style>
+<script src="https://cjrtnc.leaningtech.com/4.3/loader.js"></script>
+</head>
+<body>
+<div class="watermark">Dr. Surekha Lanka @2026 Java Programming Class</div>
+<main class="wrap">
+<h1>Obstacle Runner — Java Movement Game</h1>
+<p class="muted">Write real Java code and run it right here in your browser. Your program's output drives the Game Screen: print game commands such as <code>@POSITION 7</code> and the page moves a runner along a track.</p>
+<p class="small">There is one plain runner marker — no character to choose — so the focus stays on the logic: moving forward and backward, tracking barriers, and deciding when to jump. This page uses Java 8. Avoid newer features such as <code>var</code>, records, text blocks and <code>switch -&gt;</code>. The first run downloads Java into your browser and can take up to a minute.</p>
+
+<div class="panel"><div class="grid"><div><label for="name">Student name</label><input id="name" placeholder="Your name"></div><div><label for="id">Student ID</label><input id="id" placeholder="Your student ID"></div></div></div>
+
+<div class="panel task"><p id="stepCount" class="small"></p><h2 id="stepTitle"></h2><div id="stepText"></div><div class="stepnav"><button type="button" id="previous" class="secondary">Previous</button><button type="button" id="next">Next task</button></div></div>
+
+<div class="panel"><h2>Java code editor</h2>
+<p class="small">Write one complete program. Use <code>public class Main</code> for the main class. Keep other classes in the same editor without <code>public</code>.</p>
+<textarea id="code" spellcheck="false" aria-label="Java source code" placeholder="import java.util.*;&#10;&#10;public class Main {&#10;    static void show(String command) {&#10;        System.out.println(&quot;@&quot; + command);&#10;    }&#10;&#10;    public static void main(String[] args) {&#10;        // Write your program here&#10;        // Example: show(&quot;POSITION &quot; + position);&#10;    }&#10;}"></textarea>
+<button type="button" id="run">Run Java game</button><button type="button" id="moveExample" class="secondary">Load movement example</button><button type="button" id="download" class="secondary">Download Main.java</button><button type="button" id="save" class="secondary">Save my work</button>
+<p id="status" aria-live="polite">Loading Java…</p></div>
+<pre id="console"></pre><div id="cjDisplay"></div>
+
+<div class="panel"><h2>Game Screen</h2>
+<p class="small">This screen shows only what your Java code prints. No commands printed means nothing moves.</p>
+<div class="screen">
+  <div class="stage" aria-live="polite">
+    <div class="runner-head"><h3 id="gPlayer">No player yet</h3><p class="small" id="gStatusLine">Print @PLAYER and @POSITION 0 to begin</p></div>
+    <div class="stats">
+      <div class="stat">Position<strong id="gPosition">–</strong></div>
+      <div class="stat">Lives<strong id="gLives">–</strong></div>
+      <div class="stat">Score<strong id="gScore">–</strong></div>
+    </div>
+    <div class="track-wrap">
+      <div class="track-ground"></div>
+      <span class="start-line">START</span>
+      <div class="finish-flag">🏁</div>
+      <div id="barrierLayer"></div>
+      <div id="runnerPos" class="runner-pos"><div id="runner" class="runner"></div></div>
+    </div>
+    <div id="gResult" class="result"><span id="gResultTitle"></span><small id="gResultText"></small></div>
+  </div>
+  <ul id="gLog" class="log"><li>Game events appear here.</li></ul>
+</div>
+<button type="button" id="replay" class="play">Replay game</button><button type="button" id="demo" class="secondary">Watch demo</button>
+</div>
+
+<div class="panel"><h2>Game inputs (Scanner)</h2>
+<p class="small">Enter every answer your program will read, in order, one per line. The program receives these before it starts; it cannot pause for typing. If your program asks for more answers than you typed, you will see <code>NoSuchElementException</code>. For another choice, change the lines and run again.</p>
+<div class="grid"><div><label for="stdin">Standard input</label><textarea id="stdin" spellcheck="false" placeholder="Alex&#10;3"></textarea></div><div><label for="output">Console output and errors</label><pre id="output" aria-live="polite">Run your Java program to see results here.</pre></div></div></div>
+
+<div class="panel"><details><summary>Game command reference</summary>
+<p class="small">Print a line that starts with <code>@</code>. It goes to the Game Screen, not the console. Easiest way: add the <code>show()</code> method below to your <code>Main</code> class.</p>
+<pre>static void show(String command) {
+    System.out.println("@" + command);
+}
+// usage: show("POSITION " + position);</pre>
+<table>
+<tr><th>Print this</th><th>What happens</th></tr>
+<tr><td><code>@PLAYER Alex</code></td><td>Shows the player name</td></tr>
+<tr><td><code>@LIVES 3</code></td><td>Updates the lives counter</td></tr>
+<tr><td><code>@SCORE 50</code></td><td>Updates the score</td></tr>
+<tr><td><code>@POSITION 7</code></td><td>Moves the runner to that spot on the track (higher = forward, lower = backward)</td></tr>
+<tr><td><code>@TRACKLENGTH 20</code></td><td>Sets how far the finish line is (default 20). Print this once near the start.</td></tr>
+<tr><td><code>@BARRIER 10</code></td><td>Places a barrier marker on the track. Send one line per barrier.</td></tr>
+<tr><td><code>@JUMP</code></td><td>Plays the jump animation</td></tr>
+<tr><td><code>@HIT</code></td><td>Flashes the runner — use this when your checkBarrier() finds a collision</td></tr>
+<tr><td><code>@EVENT Nice dodge!</code></td><td>Adds a message to the event log</td></tr>
+<tr><td><code>@RESULT WIN Reached the finish line</code></td><td>Shows the final WIN or LOSE screen</td></tr>
+</table></details></div>
+
+<div class="panel"><h2>Testing and explanation</h2>
+<label for="tests">Three tests: inputs, expected result, actual result</label><textarea id="tests" rows="5" placeholder="Test 1: ...&#10;Test 2: ...&#10;Test 3: ..."></textarea>
+<label for="explanation">Explain your class, methods, array/ArrayList of barriers, Boolean logic, Random, Math methods and personal feature</label><textarea id="explanation" rows="5" placeholder="Explain what your own code does."></textarea>
+<button type="button" id="downloadWork" class="secondary">Download my submission (.json)</button></div>
+
+<p class="small">Privacy: your code runs inside your own browser and is not sent to a compiler server. Name and ID stay in this browser unless you download or share a submission. Drafts are stored in this browser, so download your work before changing computers or clearing browser data.</p>
+</main>
+
+<script>
+'use strict';
+
+const steps=[
+ ['1 — Player and runner setup','Ask for the player\'s name and starting lives (for example 3) using Scanner. Print @PLAYER and @LIVES so they show up on the Game Screen. Also print @POSITION 0 to place the runner at the start of the track.'],
+ ['2 — Runner object','Create a Runner class with fields for position, lives, score, and a boolean for whether it is currently jumping. Create one object from the class; keep the game logic in methods, not all inside main().'],
+ ['3 — Movement methods','Write moveForward(int steps) and moveBackward(int steps) methods on your Runner that change position and never let it go below 0. Print @POSITION with the new value after every move.'],
+ ['4 — Barriers (array)','Store at least four barrier positions in an array or ArrayList, for example {5, 9, 14, 18}. Print an @BARRIER command for each one so they appear on the track.'],
+ ['5 — Boolean collision check','Write a checkBarrier() method that uses a meaningful boolean expression (&&, ||, or !) to decide whether the runner\'s current position matches a barrier AND the runner is not jumping. Print @HIT when that happens.'],
+ ['6 — Jump','Write a jump() method that sets the jumping flag to true, prints @JUMP, and then sets it back to false. Time your jump so the runner is jumping exactly when it reaches a barrier.'],
+ ['7 — Random and Math','Use Random to decide how many steps to move forward on some turns. Use at least two Math methods, such as Math.max(), Math.min(), Math.round(), or Math.abs(), for something meaningful — for example keeping the position inside the track, or working out a score bonus.'],
+ ['8 — Final result','Run the course for several turns using a loop. Track lives and score as the run progresses, printing @LIVES and @SCORE whenever they change. Print @RESULT WIN if the runner reaches the finish line, or @RESULT LOSE if lives reach 0. Test at least three different situations.']
+];
+const $=id=>document.getElementById(id);let current=0;
+function showStep(){const [t,x]=steps[current];$('stepCount').textContent=`Task ${current+1} of ${steps.length}`;$('stepTitle').textContent=t;$('stepText').textContent=x;$('previous').disabled=current===0;$('next').disabled=current===steps.length-1}
+$('previous').onclick=()=>{current--;showStep()};$('next').onclick=()=>{current++;showStep()};showStep();
+
+/* ---------- Save / download ---------- */
+const keys=['name','id','code','stdin','tests','explanation'];let rawOutput='';
+function snapshot(){return Object.fromEntries(keys.map(k=>[k,$(k).value]))}
+function save(){try{localStorage.setItem('obstacleRunnerDraftV1',JSON.stringify(snapshot()));$('status').textContent='Draft saved in this browser.'}catch(e){$('status').textContent='Browser storage unavailable; download your work instead.'}}
+try{const d=JSON.parse(localStorage.getItem('obstacleRunnerDraftV1')||'{}');keys.forEach(k=>{if(typeof d[k]==='string')$(k).value=d[k]})}catch(e){}
+$('save').onclick=save;
+function download(content,filename,type){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+$('download').onclick=()=>{if(!$('code').value.trim()){$('status').textContent='Write code before downloading.';return}download($('code').value,'Main.java','text/x-java-source;charset=utf-8')};
+$('downloadWork').onclick=()=>download(JSON.stringify({...snapshot(),consoleOutput:$('output').textContent,programOutput:rawOutput},null,2),'ObstacleRunner_Submission.json','application/json;charset=utf-8');
+
+/* ---------- Movement example (demonstrates the command protocol only — no
+   collision check or lives/score logic, since that is the graded work) ---------- */
+const MOVE_EXAMPLE=`import java.util.Random;
+
+public class Main {
+    static void show(String command) {
+        System.out.println("@" + command);
+    }
+
+    public static void main(String[] args) {
+        Random random = new Random();
+        int position = 0;
+        int trackLength = 20;
+
+        show("PLAYER Alex");
+        show("POSITION " + position);
+        show("BARRIER 10");   // just to show what a barrier looks like
+
+        for (int turn = 1; turn <= 6; turn++) {
+            int step = 1 + random.nextInt(3);   // move 1-3 steps forward
+            position = Math.min(position + step, trackLength);
+            System.out.println("Turn " + turn + ": moved " + step + " steps");
+            show("POSITION " + position);
+
+            if (turn == 3) {
+                show("JUMP");
+            }
+        }
+
+        show("RESULT WIN Reached the finish line");
+    }
+}
+`;
+$('moveExample').onclick=()=>{if($('code').value.trim()&&!confirm('Replace the code in the editor with the movement example?'))return;$('code').value=MOVE_EXAMPLE;$('status').textContent='Movement example loaded. Click Run Java game.'};
+
+/* ---------- Game Screen engine ---------- */
+let g,timer,lastCmds=[];
+function resetGame(){clearTimeout(timer);g={trackLength:20,position:0,barriers:new Set(),jumping:false,player:''};
+ $('gPlayer').textContent='No player yet';$('gStatusLine').textContent='Print @PLAYER and @POSITION 0 to begin';
+ ['gPosition','gLives','gScore'].forEach(k=>$(k).textContent='–');
+ $('barrierLayer').innerHTML='';$('runnerPos').style.left='0%';$('runner').className='runner';
+ $('gResult').className='result';$('gLog').innerHTML=''}
+function log(text,warn){const li=document.createElement('li');li.textContent=text;if(warn)li.className='warn';$('gLog').appendChild(li);$('gLog').scrollTop=$('gLog').scrollHeight}
+function retrigger(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
+function num(cmd,arg){const n=parseFloat(arg);if(isNaN(n)){log(`⚠ @${cmd} needs a number, got "${arg}"`,true);return null}return n}
+function pct(n){return Math.max(0,Math.min(100,n/g.trackLength*100))+'%'}
+function apply(cmd,arg){
+ switch(cmd){
+  case 'PLAYER':g.player=arg;$('gPlayer').textContent='Player: '+arg;log('👤 Player '+arg+' joined');break;
+  case 'TRACKLENGTH':{const n=num(cmd,arg);if(n!==null&&n>0){g.trackLength=n;$('runnerPos').style.left=pct(g.position);document.querySelectorAll('.barrier').forEach(b=>b.style.left=pct(b.dataset.pos))}break}
+  case 'POSITION':{const n=num(cmd,arg);if(n===null)break;const prev=g.position;g.position=n;$('runnerPos').style.left=pct(n);$('gPosition').textContent=Math.round(n);
+   if(n>prev)log(`➡ Moved forward to ${Math.round(n)}`);else if(n<prev)log(`⬅ Moved backward to ${Math.round(n)}`);else log(`Starting position: ${Math.round(n)}`);break}
+  case 'BARRIER':{const n=num(cmd,arg);if(n===null)break;if(g.barriers.has(n))break;g.barriers.add(n);
+   const b=document.createElement('div');b.className='barrier';b.style.left=pct(n);b.dataset.pos=n;$('barrierLayer').appendChild(b);log('🚧 Barrier placed at '+Math.round(n));break}
+  case 'JUMP':{g.jumping=true;retrigger($('runner'),'jump');$('gStatusLine').textContent='Jumping…';log('🦘 Jumped');setTimeout(()=>{g.jumping=false;$('gStatusLine').textContent='Running…'},480);break}
+  case 'HIT':retrigger($('runner'),'hit');log('💥 Hit a barrier!',true);break;
+  case 'LIVES':{const n=num(cmd,arg);if(n===null)break;$('gLives').textContent=n;retrigger($('gLives'),'bump');log('❤ Lives: '+n);break}
+  case 'SCORE':{const n=num(cmd,arg);if(n===null)break;$('gScore').textContent=n;retrigger($('gScore'),'bump');break}
+  case 'EVENT':case 'SAY':log('📜 '+arg);break;
+  case 'RESULT':{const [word,...rest]=arg.split(/\s+/);const win=/^win/i.test(word);$('gResult').className='result show '+(win?'win':'lose');$('gResultTitle').textContent=win?'🏆 You win!':'💀 Game over';$('gResultText').textContent=rest.join(' ');log(win?'🏆 WIN':'💀 LOSE');break}
+  default:log(`⚠ Unknown command @${cmd}. Check the command reference.`,true)}}
+function parseOutput(text){const plain=[],cmds=[];(text||'').split(/\r?\n/).forEach(line=>{const m=line.match(/^\s*@([A-Za-z]+)\s*(.*)$/);if(m)cmds.push([m[1].toUpperCase(),m[2].trim()]);else plain.push(line)});return{plain:plain.join('\n').replace(/\s+$/,''),cmds}}
+function play(cmds){resetGame();lastCmds=cmds;if(!cmds.length){log('No game commands found. Print lines such as @POSITION 5 to animate this screen.',true);return}let i=0;const step=()=>{if(i>=cmds.length)return;apply(...cmds[i++]);timer=setTimeout(step,650)};step()}
+$('replay').onclick=()=>play(lastCmds);
+$('demo').onclick=()=>{play(parseOutput(`@PLAYER Alex
+@LIVES 3
+@SCORE 0
+@TRACKLENGTH 20
+@POSITION 0
+@BARRIER 6
+@BARRIER 12
+@BARRIER 17
+@POSITION 4
+@POSITION 6
+@JUMP
+@EVENT Cleared the first barrier
+@POSITION 10
+@SCORE 20
+@POSITION 12
+@JUMP
+@EVENT Cleared the second barrier
+@POSITION 15
+@POSITION 17
+@HIT
+@LIVES 2
+@EVENT Clipped the last barrier
+@POSITION 20
+@SCORE 50
+@RESULT WIN Reached the finish line with 2 lives left`).cmds);$('status').textContent='Demo playing. This is sample output, not your code.'};
+resetGame();
+
+/* ---------- Run Java in the browser (CheerpJ) ---------- */
+// tools.jar (the Java 8 compiler) must sit in the same folder as this page.
+const TOOLS='/app'+location.pathname.replace(/[^/]*$/,'')+'tools.jar';
+const CP=TOOLS+':/files/';
+const RUNNER=`public class ObstacleRunnerRunner {
+    public static void main(String[] args) throws Exception {
+        System.setIn(new java.io.FileInputStream("/str/stdin.txt"));
+        Main.main(args);
+    }
+}`;
+let javaReady=null,busy=false;
+function startJava(){
+ if(javaReady)return javaReady;
+ if(location.protocol==='file:'){$('status').textContent='Open this page from a web address (for example GitHub Pages), not by double-clicking the file.';return Promise.reject(Error('file protocol'))}
+ if(typeof cheerpjInit!=='function'){$('status').textContent='Java could not load. Check your internet connection and reload the page.';return Promise.reject(Error('no loader'))}
+ javaReady=cheerpjInit({status:'none',version:8}).then(()=>{cheerpjCreateDisplay(-1,-1,$('cjDisplay'));$('status').textContent='Ready. Java runs in your browser.'})
+  .catch(e=>{javaReady=null;$('status').textContent='Java could not start: '+e.message;throw e});
+ return javaReady}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function consoleText(){return $('console').textContent}
+async function run(){
+ if(busy)return;const code=$('code').value;
+ if(!code.trim()){$('status').textContent='Write your Java code first.';return}
+ if(!/class\s+Main\b/.test(code)){$('status').textContent='Your main class must be named Main (public class Main).';return}
+ busy=true;const button=$('run');button.disabled=true;
+ const slow=setTimeout(()=>{$('status').textContent='Still running… If your program has an endless loop, reload the page.'},25000);
+ try{
+  $('status').textContent='Loading Java…';await startJava();
+  const enc=new TextEncoder();
+  cheerpjAddStringFile('/str/Main.java',enc.encode(code));
+  cheerpjAddStringFile('/str/ObstacleRunnerRunner.java',enc.encode(RUNNER));
+  cheerpjAddStringFile('/str/stdin.txt',enc.encode($('stdin').value.replace(/\s*$/,'')+'\n'));
+  $('console').textContent='';$('output').textContent='Compiling…';$('status').textContent='Compiling…';
+  const compiled=await cheerpjRunMain('com.sun.tools.javac.Main',CP,'-encoding','UTF-8','-d','/files/','/str/Main.java','/str/ObstacleRunnerRunner.java');
+  await wait(200);
+  if(compiled!==0){rawOutput='';$('output').textContent='Compile errors — fix these and run again:\n\n'+(consoleText().split('/str/').join('')||'Unknown compile error.');$('status').textContent='Compile failed.';play([]);return}
+  $('console').textContent='';$('output').textContent='Running…';$('status').textContent='Running your game…';
+  const exit=await cheerpjRunMain('ObstacleRunnerRunner',CP);
+  await wait(300);
+  rawOutput=consoleText();const parsed=parseOutput(rawOutput);
+  $('output').textContent=parsed.plain||'(Program completed with no console output.)';
+  play(parsed.cmds);
+  $('status').textContent=exit===0?'Run finished.':'Run finished with an error (see console output).';save();
+ }catch(e){$('output').textContent='Unable to run Java: '+e.message;$('status').textContent='Run failed.'}
+ finally{clearTimeout(slow);busy=false;button.disabled=false}}
+$('run').onclick=run;
+window.addEventListener('load',()=>{startJava().catch(()=>{})});
+</script>
+</body>
+</html>
