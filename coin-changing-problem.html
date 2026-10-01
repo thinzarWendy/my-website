@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Activity: Coin Changing Problem (DP Tables)</title>
+<style>
+  :root{
+    --ink:#172033;
+    --muted:#5b6473;
+    --panel:#ffffff;
+    --page:#eef3f8;
+    --line:#cbd5e1;
+    --blue:#2563eb;
+    --blue2:#dbeafe;
+    --green:#059669;
+    --green2:#d1fae5;
+    --orange:#d97706;
+    --orange2:#fef3c7;
+    --red:#dc2626;
+    --red2:#fee2e2;
+    --purple:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page);
+    color:var(--ink);
+    line-height:1.45;
+  }
+  .page{max-width:1100px;margin:24px auto;padding:0 18px 50px}
+  .hero{
+    background:linear-gradient(135deg,#173b6c,#2563eb);
+    color:white;
+    padding:26px 30px;
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.18);
+  }
+  .hero h1{margin:0 0 8px;font-size:30px}
+  .hero p{margin:0;opacity:.95}
+  .card{
+    background:var(--panel);
+    border-radius:16px;
+    padding:22px;
+    margin-top:18px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);
+    border:1px solid #e5eaf0;
+  }
+  h2{margin:0 0 10px;font-size:22px}
+  h3{margin:14px 0 8px}
+  .student-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  label{font-weight:700;display:block;margin-bottom:6px}
+  input[type=text]{
+    padding:10px 11px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:15px;
+    background:white;
+  }
+  .student-grid input{width:100%}
+  .instruction{
+    background:var(--orange2);
+    border-left:5px solid var(--orange);
+    border-radius:10px;
+    padding:12px 14px;
+    margin:0 0 14px;
+  }
+  .how-it-works{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    font-size:14.5px;
+  }
+  .how-it-works code{background:#eef2f8;padding:1px 6px;border-radius:5px}
+  .problem-meta{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:14px;
+  }
+  .meta-chip{
+    background:var(--blue2);
+    color:#1d4ed8;
+    font-weight:700;
+    padding:7px 14px;
+    border-radius:999px;
+    font-size:14px;
+  }
+  .table-scroll{overflow-x:auto;margin-bottom:14px}
+  table.dp{border-collapse:collapse;margin:0 auto}
+  table.dp th, table.dp td{
+    border:1px solid var(--line);
+    padding:0;
+    text-align:center;
+    min-width:46px;
+    height:42px;
+  }
+  table.dp th{background:#eaf0f7;font-weight:800;padding:8px 6px}
+  table.dp td.rowhead{background:#eaf0f7;font-weight:800;padding:8px 10px}
+  table.dp td.fixed{background:#f8fafc;font-weight:700;color:var(--muted)}
+  table.dp td.corner{background:#eaf0f7}
+  .cell-input{
+    width:100%;
+    height:100%;
+    border:none;
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    background:transparent;
+    color:var(--ink);
+    font-family:inherit;
+  }
+  .cell-input:focus{outline:2px solid var(--blue);outline-offset:-2px}
+  td.correct{background:var(--green2)}
+  td.correct .cell-input{color:#065f46}
+  td.wrong{background:var(--red2)}
+  td.wrong .cell-input{color:#991b1b}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 10px}
+  button{
+    border:1px solid #aeb9c8;
+    border-radius:10px;
+    padding:10px 16px;
+    background:#fff;
+    color:var(--ink);
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  button:hover{transform:translateY(-1px);background:#f8fafc}
+  button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+  button.success{background:var(--green);color:white;border-color:var(--green)}
+  button.warning{background:var(--orange);color:white;border-color:var(--orange)}
+  button.ghost{background:#f8fafc}
+  .score-pill{
+    font-weight:800;
+    padding:9px 16px;
+    border-radius:999px;
+    background:#f1f5f9;
+    border:2px solid var(--line);
+    color:var(--muted);
+  }
+  .score-pill.good{background:var(--green2);border-color:var(--green);color:#065f46}
+  .score-pill.bad{background:var(--red2);border-color:var(--red);color:#991b1b}
+  .feedback{
+    margin-top:4px;
+    padding:12px;
+    border-radius:10px;
+    display:none;
+    font-weight:600;
+  }
+  .feedback.good{display:block;background:var(--green2);border:1px solid #6ee7b7;color:#065f46}
+  .feedback.bad{display:block;background:var(--red2);border:1px solid #fca5a5;color:#991b1b}
+  .score-box{
+    background:#172033;
+    color:white;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    margin-top:6px;
+  }
+  .score-number{font-size:38px;font-weight:900}
+  .footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .note{color:var(--muted);font-size:14px}
+  @media(max-width:850px){
+    .student-grid{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:white}
+    .page{max-width:none;margin:0;padding:0}
+    .hero,.card{box-shadow:none}
+    .controls,.footer-actions{display:none !important}
+    .card{break-inside:avoid}
+    * {
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <section class="hero">
+    <h1>Student Activity: Coin Changing Problem</h1>
+    <p>Fill in the dynamic programming tables below, check your work, then download your finished sheet as a PDF.</p>
+  </section>
+
+  <section class="card">
+    <h2>Student Information</h2>
+    <div class="student-grid">
+      <div>
+        <label for="studentName">Student Name</label>
+        <input id="studentName" type="text" placeholder="Enter your name">
+      </div>
+      <div>
+        <label for="studentId">Student ID</label>
+        <input id="studentId" type="text" placeholder="Enter your Student ID">
+      </div>
+      <div>
+        <label for="classSection">Class / Section</label>
+        <input id="classSection" type="text" placeholder="Enter class or section">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="instruction">
+      <strong>Instructions:</strong> Each table already has its first row (the N values) and its first column (the coin values) filled in. Complete every blank cell, then press <em>Check Table</em>. Correct cells turn green; incorrect or empty cells turn red. You can fix mistakes and check again.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Problem 1 — Number of Ways to Make Change</h2>
+    <div class="problem-meta">
+      <span class="meta-chip">Coins (C): 1, 2, 3</span>
+      <span class="meta-chip">Change (N): 5</span>
+    </div>
+    <div class="how-it-works">
+      Each row adds one more coin to the set you may use. A cell is the number of different ways to make that amount using only the coins up to that row.
+      Rule: <code>ways[row][n] = ways[row-1][n] + ways[row][n-coin]</code> (only add the second term when <code>n &ge; coin</code>), and the first row (using only the 1-coin) is always 1 for every amount.
+    </div>
+    <div class="table-scroll" id="table1Wrap"></div>
+    <div class="controls">
+      <button class="success" onclick="checkTable(1)">Check Table</button>
+      <button class="ghost" onclick="clearTable(1)">Clear Table</button>
+      <span id="score1Pill" class="score-pill">Not checked yet</span>
+    </div>
+    <div id="feedback1" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Problem 2 — Minimum Number of Coins</h2>
+    <div class="problem-meta">
+      <span class="meta-chip">Coins (C): 1, 5, 6</span>
+      <span class="meta-chip">Change (N): 11</span>
+    </div>
+    <div class="how-it-works">
+      Each row adds one more coin to the set you may use. A cell is the <em>smallest</em> number of coins needed to make that amount using only the coins up to that row.
+      Rule: <code>min[row][n] = smaller of ( min[row-1][n] , 1 + min[row][n-coin] )</code> (only consider the second option when <code>n &ge; coin</code>), and the first row (using only the 1-coin) always needs exactly <code>n</code> coins.
+    </div>
+    <div class="table-scroll" id="table2Wrap"></div>
+    <div class="controls">
+      <button class="success" onclick="checkTable(2)">Check Table</button>
+      <button class="ghost" onclick="clearTable(2)">Clear Table</button>
+      <span id="score2Pill" class="score-pill">Not checked yet</span>
+    </div>
+    <div id="feedback2" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity Score</h2>
+    <div class="score-box">
+      <div>Your total score</div>
+      <div class="score-number"><span id="totalScore">0</span> / 10</div>
+      <div>Problem 1: 5 marks &nbsp; | &nbsp; Problem 2: 5 marks</div>
+    </div>
+    <div class="footer-actions">
+      <button class="primary" onclick="window.print()">Download as PDF</button>
+      <button class="warning" onclick="resetAll()">Reset Entire Activity</button>
+    </div>
+    <p class="note">To download: press "Download as PDF", then choose "Save as PDF" (or "Microsoft Print to PDF") as the destination in the print dialog, and save the file to your computer.</p>
+  </section>
+</div>
+
+<script>
+/* ---------- DP calculators ---------- */
+function waysTable(coins, N){
+  const rows = coins.length;
+  const dp = Array.from({length:rows+1}, () => new Array(N+1).fill(0));
+  dp[0][0] = 1;
+  for(let i=1;i<=rows;i++){
+    const coin = coins[i-1];
+    for(let n=0;n<=N;n++){
+      dp[i][n] = dp[i-1][n] + (n>=coin ? dp[i][n-coin] : 0);
+    }
+  }
+  return dp;
+}
+
+function minCoinsTable(coins, N){
+  const rows = coins.length;
+  const INF = Infinity;
+  const dp = Array.from({length:rows+1}, () => new Array(N+1).fill(INF));
+  for(let i=0;i<=rows;i++) dp[i][0] = 0;
+  for(let i=1;i<=rows;i++){
+    const coin = coins[i-1];
+    for(let n=0;n<=N;n++){
+      let best = dp[i-1][n];
+      if(n>=coin && dp[i][n-coin] + 1 < best) best = dp[i][n-coin] + 1;
+      dp[i][n] = best;
+    }
+  }
+  return dp;
+}
+
+/* ---------- Problem definitions ---------- */
+const problems = {
+  1:{
+    coins:[1,2,3],
+    N:5,
+    cornerLabel:'C/N',
+    rowLabel:c => 'C = ' + c,
+    colLabel:n => 'N=' + n,
+    correct:null
+  },
+  2:{
+    coins:[1,5,6],
+    N:11,
+    cornerLabel:'',
+    rowLabel:c => String(c),
+    colLabel:n => String(n),
+    correct:null
+  }
+};
+problems[1].correct = waysTable(problems[1].coins, problems[1].N);
+problems[2].correct = minCoinsTable(problems[2].coins, problems[2].N);
+
+let score1 = 0, score2 = 0;
+
+/* ---------- Table building ---------- */
+function buildTable(problemNum){
+  const p = problems[problemNum];
+  const rows = p.coins.length;
+  let html = '<table class="dp" id="table' + problemNum + '"><thead><tr>';
+  html += '<th class="corner">' + p.cornerLabel + '</th>';
+  for(let n=0;n<=p.N;n++) html += '<th>' + p.colLabel(n) + '</th>';
+  html += '</tr></thead><tbody>';
+  for(let i=1;i<=rows;i++){
+    html += '<tr><td class="rowhead">' + p.rowLabel(p.coins[i-1]) + '</td>';
+    for(let n=0;n<=p.N;n++){
+      if(n===0){
+        html += '<td class="fixed">' + p.correct[i][0] + '</td>';
+      }else{
+        const id = 't' + problemNum + '_r' + i + '_c' + n;
+        html += '<td id="cell_' + id + '"><input class="cell-input" id="' + id + '" type="text" inputmode="numeric" autocomplete="off" aria-label="Row ' + p.coins[i-1] + ', N=' + n + '"></td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('table' + problemNum + 'Wrap').innerHTML = html;
+}
+buildTable(1);
+buildTable(2);
+
+/* ---------- Check / clear / score ---------- */
+function checkTable(problemNum){
+  const p = problems[problemNum];
+  const rows = p.coins.length;
+  let total = 0, correctCount = 0;
+
+  for(let i=1;i<=rows;i++){
+    for(let n=1;n<=p.N;n++){
+      total++;
+      const id = 't' + problemNum + '_r' + i + '_c' + n;
+      const input = document.getElementById(id);
+      const cell = document.getElementById('cell_' + id);
+      const expected = p.correct[i][n];
+      const typed = input.value.trim();
+      const isCorrect = typed !== '' && Number(typed) === expected && /^-?\d+$/.test(typed);
+      cell.classList.remove('correct','wrong');
+      cell.classList.add(isCorrect ? 'correct' : 'wrong');
+      if(isCorrect) correctCount++;
+    }
+  }
+
+  const score = Math.round((correctCount/total) * 5 * 10) / 10;
+  if(problemNum===1) score1 = score; else score2 = score;
+  updateTotal();
+
+  const pill = document.getElementById('score' + problemNum + 'Pill');
+  pill.textContent = 'Score: ' + score + ' / 5';
+  pill.className = 'score-pill ' + (score===5 ? 'good' : 'bad');
+
+  const box = document.getElementById('feedback' + problemNum);
+  if(score===5){
+    box.className = 'feedback good';
+    box.textContent = 'Excellent! Every cell in this table is correct. Score: 5 / 5.';
+  }else{
+    box.className = 'feedback bad';
+    box.textContent = 'You got ' + correctCount + ' out of ' + total + ' cells correct. Fix the red cells and check again. Score: ' + score + ' / 5.';
+  }
+}
+
+function clearTable(problemNum){
+  const p = problems[problemNum];
+  const rows = p.coins.length;
+  for(let i=1;i<=rows;i++){
+    for(let n=1;n<=p.N;n++){
+      const id = 't' + problemNum + '_r' + i + '_c' + n;
+      document.getElementById(id).value = '';
+      const cell = document.getElementById('cell_' + id);
+      cell.classList.remove('correct','wrong');
+    }
+  }
+  if(problemNum===1) score1 = 0; else score2 = 0;
+  updateTotal();
+  const pill = document.getElementById('score' + problemNum + 'Pill');
+  pill.textContent = 'Not checked yet';
+  pill.className = 'score-pill';
+  const box = document.getElementById('feedback' + problemNum);
+  box.className = 'feedback';
+  box.textContent = '';
+}
+
+function updateTotal(){
+  const total = Math.round((score1 + score2) * 10) / 10;
+  document.getElementById('totalScore').textContent = total;
+}
+
+function resetAll(){
+  if(!confirm('Reset all tables, scores, and student information?')) return;
+  document.getElementById('studentName').value = '';
+  document.getElementById('studentId').value = '';
+  document.getElementById('classSection').value = '';
+  clearTable(1);
+  clearTable(2);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
