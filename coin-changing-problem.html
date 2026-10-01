@@ -267,7 +267,6 @@
     </div>
     <div class="footer-actions">
       <button class="primary" onclick="window.print()">Download as PDF</button>
-      <button class="warning" onclick="resetAll()">Reset Entire Activity</button>
     </div>
     <p class="note">To download: press "Download as PDF", then choose "Save as PDF" (or "Microsoft Print to PDF") as the destination in the print dialog, and save the file to your computer.</p>
   </section>
@@ -440,17 +439,6 @@ function updateTotal(){
   document.getElementById('totalScore').textContent = total;
 }
 
-function resetAll(){
-  if(!confirm('Reset all tables, scores, and student information? This also unlocks both tables for a new attempt.')) return;
-  document.getElementById('studentName').value = '';
-  document.getElementById('studentId').value = '';
-  document.getElementById('classSection').value = '';
-  setTableLocked(1, false);
-  setTableLocked(2, false);
-  clearTable(1);
-  clearTable(2);
-  window.scrollTo({top:0, behavior:'smooth'});
-}
 </script>
 </body>
 </html>
