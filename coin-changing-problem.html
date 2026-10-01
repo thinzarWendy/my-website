@@ -112,12 +112,20 @@
     background:transparent;
     color:var(--ink);
     font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  .cell-input:disabled{
+    background:transparent !important;
+    -webkit-text-fill-color:currentColor;
+    opacity:1;
+    cursor:not-allowed;
   }
   .cell-input:focus{outline:2px solid var(--blue);outline-offset:-2px}
-  td.correct{background:var(--green2)}
-  td.correct .cell-input{color:#065f46}
-  td.wrong{background:var(--red2)}
-  td.wrong .cell-input{color:#991b1b}
+  td.correct{background:var(--green) !important}
+  td.correct .cell-input{color:#ffffff;font-weight:800}
+  td.wrong{background:var(--red) !important}
+  td.wrong .cell-input{color:#ffffff;font-weight:800}
   .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:4px 0 10px}
   button{
     border:1px solid #aeb9c8;
@@ -208,7 +216,7 @@
 
   <section class="card">
     <div class="instruction">
-      <strong>Instructions:</strong> Each table already has its first row (the N values) and its first column (the coin values) filled in. Complete every blank cell, then press <em>Check Table</em>. Correct cells turn green; incorrect or empty cells turn red. You can fix mistakes and check again.
+      <strong>Instructions:</strong> Each table already has its first row (the N values) and its first column (the coin values) filled in. Complete every blank cell, then press <em>Check Table</em>. Correct cells turn green; incorrect or empty cells turn red. <strong>You only get one check per table</strong> &mdash; whatever score you get on that first check is final, so fill in every cell carefully before you press the button.
     </div>
   </section>
 
@@ -224,8 +232,8 @@
     </div>
     <div class="table-scroll" id="table1Wrap"></div>
     <div class="controls">
-      <button class="success" onclick="checkTable(1)">Check Table</button>
-      <button class="ghost" onclick="clearTable(1)">Clear Table</button>
+      <button class="success" id="check1Btn" onclick="checkTable(1)">Check Table</button>
+      <button class="ghost" id="clear1Btn" onclick="clearTable(1)">Clear Table</button>
       <span id="score1Pill" class="score-pill">Not checked yet</span>
     </div>
     <div id="feedback1" class="feedback"></div>
@@ -243,8 +251,8 @@
     </div>
     <div class="table-scroll" id="table2Wrap"></div>
     <div class="controls">
-      <button class="success" onclick="checkTable(2)">Check Table</button>
-      <button class="ghost" onclick="clearTable(2)">Clear Table</button>
+      <button class="success" id="check2Btn" onclick="checkTable(2)">Check Table</button>
+      <button class="ghost" id="clear2Btn" onclick="clearTable(2)">Clear Table</button>
       <span id="score2Pill" class="score-pill">Not checked yet</span>
     </div>
     <div id="feedback2" class="feedback"></div>
@@ -347,7 +355,25 @@ buildTable(1);
 buildTable(2);
 
 /* ---------- Check / clear / score ---------- */
+let locked1 = false, locked2 = false;
+
+function setTableLocked(problemNum, locked){
+  const p = problems[problemNum];
+  const rows = p.coins.length;
+  for(let i=1;i<=rows;i++){
+    for(let n=1;n<=p.N;n++){
+      const id = 't' + problemNum + '_r' + i + '_c' + n;
+      document.getElementById(id).disabled = locked;
+    }
+  }
+  document.getElementById('check' + problemNum + 'Btn').disabled = locked;
+  document.getElementById('clear' + problemNum + 'Btn').disabled = locked;
+  if(problemNum===1) locked1 = locked; else locked2 = locked;
+}
+
 function checkTable(problemNum){
+  if((problemNum===1 && locked1) || (problemNum===2 && locked2)) return;
+
   const p = problems[problemNum];
   const rows = p.coins.length;
   let total = 0, correctCount = 0;
@@ -370,22 +396,25 @@ function checkTable(problemNum){
   const score = Math.round((correctCount/total) * 5 * 10) / 10;
   if(problemNum===1) score1 = score; else score2 = score;
   updateTotal();
+  setTableLocked(problemNum, true);
 
   const pill = document.getElementById('score' + problemNum + 'Pill');
-  pill.textContent = 'Score: ' + score + ' / 5';
+  pill.textContent = 'Final score: ' + score + ' / 5';
   pill.className = 'score-pill ' + (score===5 ? 'good' : 'bad');
 
   const box = document.getElementById('feedback' + problemNum);
   if(score===5){
     box.className = 'feedback good';
-    box.textContent = 'Excellent! Every cell in this table is correct. Score: 5 / 5.';
+    box.textContent = 'Excellent! Every cell in this table is correct. Final score: 5 / 5.';
   }else{
     box.className = 'feedback bad';
-    box.textContent = 'You got ' + correctCount + ' out of ' + total + ' cells correct. Fix the red cells and check again. Score: ' + score + ' / 5.';
+    box.textContent = 'You got ' + correctCount + ' out of ' + total + ' cells correct. This table only allows one check, so this is your final score: ' + score + ' / 5.';
   }
 }
 
 function clearTable(problemNum){
+  if((problemNum===1 && locked1) || (problemNum===2 && locked2)) return;
+
   const p = problems[problemNum];
   const rows = p.coins.length;
   for(let i=1;i<=rows;i++){
@@ -412,10 +441,12 @@ function updateTotal(){
 }
 
 function resetAll(){
-  if(!confirm('Reset all tables, scores, and student information?')) return;
+  if(!confirm('Reset all tables, scores, and student information? This also unlocks both tables for a new attempt.')) return;
   document.getElementById('studentName').value = '';
   document.getElementById('studentId').value = '';
   document.getElementById('classSection').value = '';
+  setTableLocked(1, false);
+  setTableLocked(2, false);
   clearTable(1);
   clearTable(2);
   window.scrollTo({top:0, behavior:'smooth'});
