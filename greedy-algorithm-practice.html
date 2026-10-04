@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Activity: Greedy Algorithms Practice</title>
+<style>
+  :root{
+    --ink:#172033;
+    --muted:#5b6473;
+    --panel:#ffffff;
+    --page:#eef3f8;
+    --line:#cbd5e1;
+    --blue:#2563eb;
+    --blue2:#dbeafe;
+    --green:#059669;
+    --green2:#d1fae5;
+    --orange:#d97706;
+    --orange2:#fef3c7;
+    --red:#dc2626;
+    --red2:#fee2e2;
+    --purple:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page);
+    color:var(--ink);
+    line-height:1.45;
+  }
+  .page{max-width:1100px;margin:24px auto;padding:0 18px 50px}
+  .hero{
+    background:linear-gradient(135deg,#78350f,#d97706);
+    color:white;
+    padding:26px 30px;
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.18);
+  }
+  .hero h1{margin:0 0 8px;font-size:30px}
+  .hero p{margin:0;opacity:.95}
+  .card{
+    background:var(--panel);
+    border-radius:16px;
+    padding:22px;
+    margin-top:18px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);
+    border:1px solid #e5eaf0;
+  }
+  h2{margin:0 0 10px;font-size:22px}
+  h3{margin:16px 0 8px;font-size:17px}
+  .student-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  label{font-weight:700;display:block;margin-bottom:6px}
+  input[type=text]{
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:15px;
+    background:white;
+    font-family:inherit;
+  }
+  select{
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:15px;
+    background:white;
+    font-family:inherit;
+  }
+  .student-grid input{width:100%}
+  .instruction{
+    background:var(--orange2);
+    border-left:5px solid var(--orange);
+    border-radius:10px;
+    padding:12px 14px;
+    margin:0 0 14px;
+  }
+  .how-it-works{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    font-size:14.5px;
+  }
+  .how-it-works code{background:#eef2f8;padding:1px 6px;border-radius:5px}
+  table.plain{border-collapse:collapse;margin:10px 0}
+  table.plain th, table.plain td{border:1px solid var(--line);padding:8px 14px;text-align:center}
+  table.plain th{background:#eaf0f7;font-weight:800}
+  .table-scroll{overflow-x:auto}
+
+  /* dense fill-in grid (knapsack ratio table, huffman tables) */
+  table.grid{border-collapse:collapse;margin:0}
+  table.grid th, table.grid td{
+    border:1px solid var(--line);
+    padding:0;
+    text-align:center;
+    min-width:58px;
+    height:40px;
+  }
+  table.grid th{background:#eaf0f7;font-weight:800;padding:7px 6px}
+  table.grid td.rowhead{background:#f8fafc;font-weight:700;padding:7px 10px;text-align:left}
+  table.grid td.fixed{background:#f8fafc;font-weight:700;color:var(--ink)}
+  .cell-input{
+    width:100%;
+    height:100%;
+    border:none;
+    text-align:center;
+    font-size:14.5px;
+    font-weight:700;
+    background:transparent;
+    color:var(--ink);
+    font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  .cell-input:disabled{
+    background:transparent !important;
+    -webkit-text-fill-color:currentColor;
+    opacity:1;
+    cursor:not-allowed;
+  }
+  .cell-input:focus{outline:2px solid var(--blue);outline-offset:-2px}
+  td.correct{background:var(--green) !important}
+  td.correct .cell-input{color:#fff;font-weight:800}
+  td.wrong{background:var(--red) !important}
+  td.wrong .cell-input{color:#fff;font-weight:800}
+
+  /* labeled field rows */
+  .field-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+  .field-row.correct{background:var(--green2);border-color:var(--green)}
+  .field-row.wrong{background:var(--red2);border-color:var(--red)}
+  .field-row .flabel{font-weight:700}
+  .field-row input[type=text], .field-row select{width:140px}
+  .field-row select:disabled, .field-row input:disabled{
+    opacity:1;
+    -webkit-text-fill-color:currentColor;
+    color:var(--ink);
+    background:transparent;
+    border-color:transparent;
+  }
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 10px}
+  button{
+    border:1px solid #aeb9c8;
+    border-radius:10px;
+    padding:10px 16px;
+    background:#fff;
+    color:var(--ink);
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  button:hover:not(:disabled){transform:translateY(-1px);background:#f8fafc}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+  button.success{background:var(--green);color:white;border-color:var(--green)}
+  .score-pill{
+    font-weight:800;
+    padding:9px 16px;
+    border-radius:999px;
+    background:#f1f5f9;
+    border:2px solid var(--line);
+    color:var(--muted);
+  }
+  .score-pill.good{background:var(--green2);border-color:var(--green);color:#065f46}
+  .score-pill.bad{background:var(--red2);border-color:var(--red);color:#991b1b}
+  .feedback{
+    margin-top:10px;
+    padding:12px;
+    border-radius:10px;
+    display:none;
+    font-weight:600;
+  }
+  .feedback.good{display:block;background:var(--green2);border:1px solid #6ee7b7;color:#065f46}
+  .feedback.bad{display:block;background:var(--red2);border:1px solid #fca5a5;color:#991b1b}
+  .score-box{
+    background:#172033;
+    color:white;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    margin-top:6px;
+  }
+  .score-number{font-size:38px;font-weight:900}
+  .footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .note{color:var(--muted);font-size:14px}
+  .msg-box{
+    background:#101e33;
+    color:#e4ecfa;
+    border-radius:10px;
+    padding:14px 18px;
+    font-family:Consolas,Monaco,monospace;
+    font-size:16px;
+    letter-spacing:1px;
+    margin-bottom:14px;
+  }
+  @media(max-width:850px){
+    .student-grid{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:white}
+    .page{max-width:none;margin:0;padding:0}
+    .hero,.card{box-shadow:none}
+    .controls,.footer-actions{display:none !important}
+    .card{break-inside:avoid}
+    * {
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <section class="hero">
+    <h1>Student Activity: Greedy Algorithms Practice</h1>
+    <p>Practice three greedy-algorithm topics for the final exam: the Traveling Salesman nearest-neighbor heuristic, the fractional knapsack problem, and Huffman coding.</p>
+  </section>
+
+  <section class="card">
+    <h2>Student Information</h2>
+    <div class="student-grid">
+      <div>
+        <label for="studentName">Student Name</label>
+        <input id="studentName" type="text" placeholder="Enter your name">
+      </div>
+      <div>
+        <label for="studentId">Student ID</label>
+        <input id="studentId" type="text" placeholder="Enter your Student ID">
+      </div>
+      <div>
+        <label for="classSection">Class / Section</label>
+        <input id="classSection" type="text" placeholder="Enter class or section">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="instruction">
+      <strong>Instructions:</strong> Work through the three sections below. For decimal answers, round to two decimal places. <strong>Each section only allows one check</strong> &mdash; whatever score you get on that first check is final, so double-check your work before you press the button. When all three are done, download your results as a PDF.
+    </div>
+  </section>
+
+  <!-- ================= SECTION 1: TSP ================= -->
+  <section class="card">
+    <h2>Part 1 — Traveling Salesman Problem (Nearest Neighbor)</h2>
+    <p>Four cities A, B, C, D with the distances below. Starting at A, the <em>nearest neighbor</em> algorithm repeatedly travels to the closest unvisited city, then returns to A at the end. If two unvisited cities are equally close, choose the one earlier in the alphabet.</p>
+    <div class="table-scroll">
+      <table class="plain">
+        <tr><th></th><th>A</th><th>B</th><th>C</th><th>D</th></tr>
+        <tr><th>A</th><td>&ndash;</td><td>13</td><td>13</td><td>24</td></tr>
+        <tr><th>B</th><td>13</td><td>&ndash;</td><td>10</td><td>13</td></tr>
+        <tr><th>C</th><td>13</td><td>10</td><td>&ndash;</td><td>13</td></tr>
+        <tr><th>D</th><td>24</td><td>13</td><td>13</td><td>&ndash;</td></tr>
+      </table>
+    </div>
+
+    <h3>Task 1.1 — Run the nearest neighbor algorithm starting at A</h3>
+    <div class="field-row">
+      <span class="flabel">Route: A &rarr;</span>
+      <select id="t1_city2"><option value="">Choose</option><option>B</option><option>C</option><option>D</option></select>
+      <span>&rarr;</span>
+      <select id="t1_city3"><option value="">Choose</option><option>B</option><option>C</option><option>D</option></select>
+      <span>&rarr;</span>
+      <select id="t1_city4"><option value="">Choose</option><option>B</option><option>C</option><option>D</option></select>
+      <span>&rarr; A</span>
+    </div>
+    <div class="field-row">
+      <span class="flabel">Total distance of this route</span>
+      <input type="text" id="t1_nntotal" inputmode="decimal" placeholder="e.g. 60">
+    </div>
+
+    <h3>Task 1.2 — Compare every possible round trip to find the true optimal route</h3>
+    <div class="field-row">
+      <span class="flabel">Route A-B-C-D-A, total distance</span>
+      <input type="text" id="t1_r1" inputmode="decimal">
+    </div>
+    <div class="field-row">
+      <span class="flabel">Route A-B-D-C-A, total distance</span>
+      <input type="text" id="t1_r2" inputmode="decimal">
+    </div>
+    <div class="field-row">
+      <span class="flabel">Route A-C-B-D-A, total distance</span>
+      <input type="text" id="t1_r3" inputmode="decimal">
+    </div>
+    <div class="field-row">
+      <span class="flabel">Which route is optimal (shortest)?</span>
+      <select id="t1_optimal">
+        <option value="">Choose</option>
+        <option value="A-B-C-D-A">A-B-C-D-A</option>
+        <option value="A-B-D-C-A">A-B-D-C-A</option>
+        <option value="A-C-B-D-A">A-C-B-D-A</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <button class="success" id="check1Btn" onclick="checkSection(1)">Check Part 1</button>
+      <span id="score1Pill" class="score-pill">Not checked yet</span>
+    </div>
+    <div id="feedback1" class="feedback"></div>
+  </section>
+
+  <!-- ================= SECTION 2: Fractional Knapsack ================= -->
+  <section class="card">
+    <h2>Part 2 — Fractional Knapsack Problem</h2>
+    <p>Bag capacity m = 15. Seven objects with the values and weights below (each object can be taken as a fraction).</p>
+    <div class="table-scroll">
+      <table class="grid" id="knapTable"></table>
+    </div>
+
+    <h3>Task 2.3 — Final totals using the greedy (highest ratio first) allocation</h3>
+    <div class="field-row">
+      <span class="flabel">Total value achieved</span>
+      <input type="text" id="k_totalV" inputmode="decimal" placeholder="e.g. 55.33">
+    </div>
+    <div class="field-row">
+      <span class="flabel">Total weight used</span>
+      <input type="text" id="k_totalW" inputmode="decimal" placeholder="e.g. 15">
+    </div>
+
+    <div class="controls">
+      <button class="success" id="check2Btn" onclick="checkSection(2)">Check Part 2</button>
+      <span id="score2Pill" class="score-pill">Not checked yet</span>
+    </div>
+    <div id="feedback2" class="feedback"></div>
+  </section>
+
+  <!-- ================= SECTION 3: Huffman Coding ================= -->
+  <section class="card">
+    <h2>Part 3 — Huffman Coding</h2>
+    <p>Message to compress:</p>
+    <div class="msg-box">BCCABBDDAECCBBAEDDCC</div>
+
+    <h3>Task 3.1 — Count how many times each character appears</h3>
+    <div class="table-scroll">
+      <table class="grid" id="freqTable"></table>
+    </div>
+
+    <h3>Task 3.2 — Build the Huffman tree and give each character's code length (in bits)</h3>
+    <p class="note">You only need the number of bits in each character's code, not the exact 0/1 pattern.</p>
+    <div class="table-scroll">
+      <table class="grid" id="lenTable"></table>
+    </div>
+
+    <h3>Task 3.3 — Final bit totals</h3>
+    <div class="field-row">
+      <span class="flabel">Total compressed message bits (count &times; code length, summed)</span>
+      <input type="text" id="h_msgbits" inputmode="decimal" placeholder="e.g. 45">
+    </div>
+    <div class="field-row">
+      <span class="flabel">Dictionary overhead (8 + code length, summed over all characters)</span>
+      <input type="text" id="h_overhead" inputmode="decimal" placeholder="e.g. 52">
+    </div>
+    <div class="field-row">
+      <span class="flabel">Grand total bits sent</span>
+      <input type="text" id="h_total" inputmode="decimal" placeholder="e.g. 97">
+    </div>
+
+    <div class="controls">
+      <button class="success" id="check3Btn" onclick="checkSection(3)">Check Part 3</button>
+      <span id="score3Pill" class="score-pill">Not checked yet</span>
+    </div>
+    <div id="feedback3" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Activity Score</h2>
+    <div class="score-box">
+      <div>Your total score</div>
+      <div class="score-number"><span id="totalScore">0</span> / 15</div>
+      <div>Part 1: 5 marks &nbsp; | &nbsp; Part 2: 5 marks &nbsp; | &nbsp; Part 3: 5 marks</div>
+    </div>
+    <div class="footer-actions">
+      <button class="primary" onclick="window.print()">Download as PDF</button>
+    </div>
+    <p class="note">To download: press "Download as PDF", then choose "Save as PDF" (or "Microsoft Print to PDF") as the destination in the print dialog, and save the file to your computer.</p>
+  </section>
+</div>
+
+<script>
+'use strict';
+
+const scores = {1:0, 2:0, 3:0};
+const locked = {1:false, 2:false, 3:false};
+
+/* ---------- helpers ---------- */
+function parseNum(raw){
+  if(raw === null || raw === undefined) return null;
+  const t = String(raw).trim();
+  if(t === '') return null;
+  const n = Number(t);
+  return isNaN(n) ? null : n;
+}
+
+/* Build a dense fill-in grid. columns: array of {label, fixed?:value, id?:string}
+   rows: array of {label, cells: array aligned with columns, each either {fixed:value} or {id:string}} */
+function buildGrid(tableId, header, rows){
+  let html = '<thead><tr><th></th>';
+  header.forEach(h => html += '<th>' + h + '</th>');
+  html += '</tr></thead><tbody>';
+  rows.forEach(row => {
+    html += '<tr><td class="rowhead">' + row.label + '</td>';
+    row.cells.forEach(cell => {
+      if(cell.fixed !== undefined){
+        html += '<td class="fixed">' + cell.fixed + '</td>';
+      }else{
+        html += '<td id="cell_' + cell.id + '"><input class="cell-input" id="' + cell.id + '" type="text" inputmode="decimal" autocomplete="off"></td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById(tableId).innerHTML = html;
+}
+
+/* ---------- Part 2: Fractional knapsack data ---------- */
+const kItems = [
+  {v:10, w:2}, {v:5, w:3}, {v:15, w:5}, {v:7, w:7}, {v:6, w:1}, {v:18, w:4}, {v:3, w:1}
+];
+const kRatios = kItems.map(it => it.v / it.w);
+const kHowMuch = [1, 2/3, 1, 0, 1, 1, 1];
+
+buildGrid('knapTable',
+  kItems.map((it, i) => 'Obj ' + (i+1)),
+  [
+    {label:'Value', cells: kItems.map(it => ({fixed: it.v}))},
+    {label:'Weight', cells: kItems.map(it => ({fixed: it.w}))},
+    {label:'Value/Weight', cells: kItems.map((it, i) => ({id: 'k_ratio' + i}))},
+    {label:'How much? (0 to 1)', cells: kItems.map((it, i) => ({id: 'k_how' + i}))}
+  ]
+);
+
+/* ---------- Part 3: Huffman data ---------- */
+const hChars = ['A','B','C','D','E'];
+const hFreq = {A:3, B:5, C:6, D:4, E:2};
+const hLen = {A:3, B:2, C:2, D:2, E:3};
+
+buildGrid('freqTable',
+  hChars,
+  [{label:'Count', cells: hChars.map(c => ({id: 'h_freq_' + c}))}]
+);
+
+buildGrid('lenTable',
+  hChars,
+  [{label:'Code length (bits)', cells: hChars.map(c => ({id: 'h_len_' + c}))}]
+);
+
+/* ---------- Section definitions for grading ---------- */
+function section1Fields(){
+  return [
+    {kind:'select', id:'t1_city2', expected:'B'},
+    {kind:'select', id:'t1_city3', expected:'C'},
+    {kind:'select', id:'t1_city4', expected:'D'},
+    {kind:'number', id:'t1_nntotal', expected:60, tol:0.5},
+    {kind:'number', id:'t1_r1', expected:60, tol:0.5},
+    {kind:'number', id:'t1_r2', expected:52, tol:0.5},
+    {kind:'number', id:'t1_r3', expected:60, tol:0.5},
+    {kind:'select', id:'t1_optimal', expected:'A-B-D-C-A'}
+  ];
+}
+
+function section2Fields(){
+  const fields = [];
+  kRatios.forEach((r, i) => fields.push({kind:'number', id:'k_ratio' + i, expected:r, tol:0.02}));
+  kHowMuch.forEach((h, i) => fields.push({kind:'number', id:'k_how' + i, expected:h, tol:0.02}));
+  fields.push({kind:'number', id:'k_totalV', expected:55.33, tol:0.1});
+  fields.push({kind:'number', id:'k_totalW', expected:15, tol:0.1});
+  return fields;
+}
+
+function section3Fields(){
+  const fields = [];
+  hChars.forEach(c => fields.push({kind:'number', id:'h_freq_' + c, expected:hFreq[c], tol:0.01}));
+  hChars.forEach(c => fields.push({kind:'number', id:'h_len_' + c, expected:hLen[c], tol:0.01}));
+  fields.push({kind:'number', id:'h_msgbits', expected:45, tol:0.5});
+  fields.push({kind:'number', id:'h_overhead', expected:52, tol:0.5});
+  fields.push({kind:'number', id:'h_total', expected:97, tol:0.5});
+  return fields;
+}
+
+const sectionFields = {1: section1Fields, 2: section2Fields, 3: section3Fields};
+
+/* ---------- Grading + locking ---------- */
+function wrapperFor(field){
+  const cellWrap = document.getElementById('cell_' + field.id);
+  if(cellWrap) return cellWrap;
+  const el = document.getElementById(field.id);
+  return el.closest('.field-row');
+}
+
+function gradeField(field){
+  const el = document.getElementById(field.id);
+  const wrap = wrapperFor(field);
+  let ok = false;
+
+  if(field.kind === 'select'){
+    ok = el.value === field.expected;
+  }else{
+    const n = parseNum(el.value);
+    ok = n !== null && Math.abs(n - field.expected) <= field.tol;
+  }
+
+  wrap.classList.remove('correct', 'wrong');
+  wrap.classList.add(ok ? 'correct' : 'wrong');
+  el.disabled = true;
+  return ok;
+}
+
+function checkSection(num){
+  if(locked[num]) return;
+
+  const fields = sectionFields[num]();
+  let correctCount = 0;
+  fields.forEach(f => { if(gradeField(f)) correctCount++; });
+
+  const score = Math.round((correctCount / fields.length) * 5 * 10) / 10;
+  scores[num] = score;
+  updateTotal();
+  locked[num] = true;
+  document.getElementById('check' + num + 'Btn').disabled = true;
+
+  const pill = document.getElementById('score' + num + 'Pill');
+  pill.textContent = 'Final score: ' + score + ' / 5';
+  pill.className = 'score-pill ' + (score === 5 ? 'good' : 'bad');
+
+  const box = document.getElementById('feedback' + num);
+  if(score === 5){
+    box.className = 'feedback good';
+    box.textContent = 'Excellent! Every answer in this part is correct. Final score: 5 / 5.';
+  }else{
+    box.className = 'feedback bad';
+    box.textContent = 'You got ' + correctCount + ' out of ' + fields.length + ' correct. This part only allows one check, so this is your final score: ' + score + ' / 5.';
+  }
+}
+
+function updateTotal(){
+  const total = Math.round((scores[1] + scores[2] + scores[3]) * 10) / 10;
+  document.getElementById('totalScore').textContent = total;
+}
+</script>
+</body>
+</html>
