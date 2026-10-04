@@ -325,7 +325,7 @@
     <div id="part2Locked" class="locked-banner">Check Part 1 first to unlock this section.</div>
     <div id="part2Body">
       <div class="how-it-works">
-        Start at the bottom row (the last item) at <code>j = 7</code>. If that cell's value is the <em>same</em> as the cell directly above it, the item was skipped &mdash; move straight up. If it is <em>different</em>, the item was taken &mdash; move up and left by that item's weight. The reference table below (filled in automatically) shows the correct numbers so a mistake in Part 1 does not carry over.
+        Start at the bottom row (the last item) at <code>j = 7</code>. If that cell's value is the <em>same</em> as the cell directly above it, the item was skipped &mdash; move straight up. If it is <em>different</em>, the item was taken &mdash; move up and left by that item's weight. The table below shows exactly what you submitted in Part 1 &mdash; if a value there was wrong, your backtracking (and this section's score) may be affected too.
       </div>
       <div class="ref-table-wrap">
         <table class="ref" id="refTableWrap"></table>
@@ -476,7 +476,8 @@ function buildRefTable(){
   for(let i=0;i<n;i++){
     html += '<tr><td>' + items[i].v + '</td><td>' + items[i].w + '</td>';
     for(let j=0;j<=capacity;j++){
-      html += '<td class="answer">' + correctDp[i][j] + '</td>';
+      const typed = document.getElementById('d_r' + i + '_c' + j).value.trim();
+      html += '<td class="answer">' + (typed === '' ? '&ndash;' : typed) + '</td>';
     }
     html += '</tr>';
   }
