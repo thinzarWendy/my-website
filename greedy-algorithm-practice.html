@@ -113,6 +113,8 @@
     font-family:inherit;
     appearance:none;
     -webkit-appearance:none;
+    padding:0 !important;
+    box-sizing:border-box;
   }
   .cell-input:disabled{
     background:transparent !important;
@@ -196,18 +198,65 @@
   .score-number{font-size:38px;font-weight:900}
   .footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
   .note{color:var(--muted);font-size:14px}
-  .huffman-solution{display:none;margin-top:18px;border-top:2px dashed var(--line);padding-top:16px}
-  .huffman-solution.show{display:block}
   .huffman-diagram{overflow-x:auto;margin:10px 0 18px}
-  .huffman-diagram svg{min-width:560px;width:100%;max-width:640px;display:block;margin:0 auto}
+  .huffman-diagram svg{min-width:560px;width:100%;max-width:640px;display:block;margin:0 auto;overflow:visible}
   .edge{stroke:#94a3b8;stroke-width:2}
-  .node-val{font-size:18px;font-weight:800;fill:var(--ink);text-anchor:middle}
-  .badge{fill:var(--orange2);stroke:var(--orange);stroke-width:1.5;rx:4}
-  .badge-text{font-size:13px;font-weight:800;fill:#7c2d12;text-anchor:middle}
   .leaf-box{fill:#fff;stroke:var(--line);stroke-width:1.5}
   .leaf-divider{stroke:var(--line);stroke-width:1.5}
   .leaf-top{font-size:16px;font-weight:700;fill:var(--ink);text-anchor:middle}
   .leaf-bottom{font-size:16px;font-weight:800;fill:var(--ink);text-anchor:middle}
+  .node-input, .badge-input{
+    box-sizing:border-box;
+    text-align:center;
+    font-weight:800;
+    font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+    padding:0 !important;
+  }
+  .node-input{
+    width:100%;height:100%;
+    font-size:14px;
+    border:1.5px solid var(--line);
+    border-radius:5px;
+    background:#fff;
+    color:var(--ink);
+  }
+  .badge-input{
+    width:100%;height:100%;
+    font-size:12px;
+    border:1.5px solid var(--orange);
+    border-radius:4px;
+    background:var(--orange2);
+    color:#7c2d12;
+  }
+  .node-input:disabled, .badge-input:disabled, .code-input:disabled{
+    background:transparent !important;
+    opacity:1;
+    -webkit-text-fill-color:currentColor;
+    cursor:not-allowed;
+  }
+  .node-input.correct, .badge-input.correct{background:var(--green) !important;border-color:var(--green);color:#fff !important;-webkit-text-fill-color:#fff}
+  .node-input.wrong, .badge-input.wrong{background:var(--red) !important;border-color:var(--red);color:#fff !important;-webkit-text-fill-color:#fff}
+  .code-input{
+    width:100%;height:100%;
+    border:none;
+    text-align:center;
+    font-size:14.5px;
+    font-weight:700;
+    font-family:Consolas,Monaco,monospace;
+    background:transparent;
+    color:var(--ink);
+    appearance:none;
+    -webkit-appearance:none;
+    padding:0 !important;
+    box-sizing:border-box;
+  }
+  #codeTable td{padding:0;height:40px}
+  #codeTable td.correct{background:var(--green) !important}
+  #codeTable td.correct .code-input{color:#fff;font-weight:800}
+  #codeTable td.wrong{background:var(--red) !important}
+  #codeTable td.wrong .code-input{color:#fff;font-weight:800}
   .msg-box{
     background:#101e33;
     color:#e4ecfa;
@@ -361,13 +410,79 @@
       <table class="grid" id="freqTable"></table>
     </div>
 
-    <h3>Task 3.2 — Build the Huffman tree and give each character's code length (in bits)</h3>
-    <p class="note">You only need the number of bits in each character's code, not the exact 0/1 pattern.</p>
-    <div class="table-scroll">
-      <table class="grid" id="lenTable"></table>
+    <h3>Task 3.2 — Build the Huffman tree</h3>
+    <p class="note">The shape of the tree (which counts merge together) is already drawn for you. Fill in each merge total, then label every left branch 0 and every right branch 1.</p>
+    <div class="huffman-diagram">
+      <svg viewBox="0 0 620 300" role="img" aria-label="Huffman tree for BCCABBDDAECCBBAEDDCC, partly filled in">
+        <line class="edge" x1="355" y1="58" x2="220" y2="122"/>
+        <line class="edge" x1="355" y1="58" x2="490" y2="122"/>
+        <line class="edge" x1="220" y1="138" x2="130" y2="202"/>
+        <line class="edge" x1="220" y1="138" x2="310" y2="240"/>
+        <line class="edge" x1="130" y1="218" x2="70" y2="240"/>
+        <line class="edge" x1="130" y1="218" x2="190" y2="240"/>
+        <line class="edge" x1="490" y1="138" x2="430" y2="240"/>
+        <line class="edge" x1="490" y1="138" x2="550" y2="240"/>
+
+        <foreignObject x="338" y="28" width="34" height="22"><input class="node-input" id="h_node_root" type="text" inputmode="numeric" autocomplete="off" aria-label="Root merge total"></foreignObject>
+        <foreignObject x="203" y="100" width="34" height="22"><input class="node-input" id="h_node_9" type="text" inputmode="numeric" autocomplete="off" aria-label="Merge total for the 5-and-D group"></foreignObject>
+        <foreignObject x="473" y="100" width="34" height="22"><input class="node-input" id="h_node_11" type="text" inputmode="numeric" autocomplete="off" aria-label="Merge total for B and C"></foreignObject>
+        <foreignObject x="113" y="180" width="34" height="22"><input class="node-input" id="h_node_5" type="text" inputmode="numeric" autocomplete="off" aria-label="Merge total for E and A"></foreignObject>
+
+        <foreignObject x="272" y="78" width="22" height="22"><input class="badge-input" id="h_edge_root9" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward the 9 node"></foreignObject>
+        <foreignObject x="418" y="78" width="22" height="22"><input class="badge-input" id="h_edge_root11" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward the 11 node"></foreignObject>
+        <foreignObject x="163" y="158" width="22" height="22"><input class="badge-input" id="h_edge_9_5" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward the 5 node"></foreignObject>
+        <foreignObject x="258" y="178" width="22" height="22"><input class="badge-input" id="h_edge_9_D" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward D"></foreignObject>
+        <foreignObject x="84" y="218" width="22" height="22"><input class="badge-input" id="h_edge_5_E" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward E"></foreignObject>
+        <foreignObject x="169" y="218" width="22" height="22"><input class="badge-input" id="h_edge_5_A" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward A"></foreignObject>
+        <foreignObject x="443" y="178" width="22" height="22"><input class="badge-input" id="h_edge_11_B" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward B"></foreignObject>
+        <foreignObject x="538" y="178" width="22" height="22"><input class="badge-input" id="h_edge_11_C" type="text" inputmode="numeric" autocomplete="off" aria-label="0 or 1 toward C"></foreignObject>
+
+        <g>
+          <rect class="leaf-box" x="25" y="240" width="90" height="56"/>
+          <line class="leaf-divider" x1="25" y1="268" x2="115" y2="268"/>
+          <text x="70" y="261" class="leaf-top">2</text>
+          <text x="70" y="291" class="leaf-bottom">E</text>
+        </g>
+        <g>
+          <rect class="leaf-box" x="145" y="240" width="90" height="56"/>
+          <line class="leaf-divider" x1="145" y1="268" x2="235" y2="268"/>
+          <text x="190" y="261" class="leaf-top">3</text>
+          <text x="190" y="291" class="leaf-bottom">A</text>
+        </g>
+        <g>
+          <rect class="leaf-box" x="265" y="240" width="90" height="56"/>
+          <line class="leaf-divider" x1="265" y1="268" x2="355" y2="268"/>
+          <text x="310" y="261" class="leaf-top">4</text>
+          <text x="310" y="291" class="leaf-bottom">D</text>
+        </g>
+        <g>
+          <rect class="leaf-box" x="385" y="240" width="90" height="56"/>
+          <line class="leaf-divider" x1="385" y1="268" x2="475" y2="268"/>
+          <text x="430" y="261" class="leaf-top">5</text>
+          <text x="430" y="291" class="leaf-bottom">B</text>
+        </g>
+        <g>
+          <rect class="leaf-box" x="505" y="240" width="90" height="56"/>
+          <line class="leaf-divider" x1="505" y1="268" x2="595" y2="268"/>
+          <text x="550" y="261" class="leaf-top">6</text>
+          <text x="550" y="291" class="leaf-bottom">C</text>
+        </g>
+      </svg>
     </div>
 
-    <h3>Task 3.3 — Final bit totals</h3>
+    <h3>Task 3.3 — Read the code for each character off the tree</h3>
+    <div class="table-scroll">
+      <table class="plain" id="codeTable">
+        <tr><th>Char</th><th>Count</th><th>Code</th></tr>
+        <tr><td>A</td><td>3</td><td id="cell_h_code_A"><input class="code-input" id="h_code_A" type="text" autocomplete="off"></td></tr>
+        <tr><td>B</td><td>5</td><td id="cell_h_code_B"><input class="code-input" id="h_code_B" type="text" autocomplete="off"></td></tr>
+        <tr><td>C</td><td>6</td><td id="cell_h_code_C"><input class="code-input" id="h_code_C" type="text" autocomplete="off"></td></tr>
+        <tr><td>D</td><td>4</td><td id="cell_h_code_D"><input class="code-input" id="h_code_D" type="text" autocomplete="off"></td></tr>
+        <tr><td>E</td><td>2</td><td id="cell_h_code_E"><input class="code-input" id="h_code_E" type="text" autocomplete="off"></td></tr>
+      </table>
+    </div>
+
+    <h3>Task 3.4 — Final bit totals</h3>
     <div class="field-row">
       <span class="flabel">Total compressed message bits (count &times; code length, summed)</span>
       <input type="text" id="h_msgbits" inputmode="decimal" placeholder="e.g. 45">
@@ -386,76 +501,6 @@
       <span id="score3Pill" class="score-pill">Not checked yet</span>
     </div>
     <div id="feedback3" class="feedback"></div>
-
-    <div id="huffmanSolution" class="huffman-solution">
-      <h3>Solution walkthrough — how the Huffman tree was built</h3>
-      <p class="note">Merge the two smallest counts first, repeat until one tree is left, then read 0 going left and 1 going right down to each letter.</p>
-      <div class="huffman-diagram">
-        <svg viewBox="0 0 620 300" role="img" aria-label="Huffman tree for BCCABBDDAECCBBAEDDCC">
-          <line class="edge" x1="355" y1="58" x2="220" y2="122"/>
-          <line class="edge" x1="355" y1="58" x2="490" y2="122"/>
-          <line class="edge" x1="220" y1="138" x2="130" y2="202"/>
-          <line class="edge" x1="220" y1="138" x2="310" y2="240"/>
-          <line class="edge" x1="130" y1="218" x2="70" y2="240"/>
-          <line class="edge" x1="130" y1="218" x2="190" y2="240"/>
-          <line class="edge" x1="490" y1="138" x2="430" y2="240"/>
-          <line class="edge" x1="490" y1="138" x2="550" y2="240"/>
-
-          <text x="355" y="46" class="node-val">20</text>
-          <text x="220" y="118" class="node-val">9</text>
-          <text x="490" y="118" class="node-val">11</text>
-          <text x="130" y="198" class="node-val">5</text>
-
-          <g transform="translate(272,78)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">0</text></g>
-          <g transform="translate(418,78)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">1</text></g>
-          <g transform="translate(163,158)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">0</text></g>
-          <g transform="translate(258,178)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">1</text></g>
-          <g transform="translate(84,218)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">0</text></g>
-          <g transform="translate(169,218)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">1</text></g>
-          <g transform="translate(443,178)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">0</text></g>
-          <g transform="translate(538,178)"><rect class="badge" width="22" height="22"/><text x="11" y="16" class="badge-text">1</text></g>
-
-          <g>
-            <rect class="leaf-box" x="25" y="240" width="90" height="56"/>
-            <line class="leaf-divider" x1="25" y1="268" x2="115" y2="268"/>
-            <text x="70" y="261" class="leaf-top">2</text>
-            <text x="70" y="291" class="leaf-bottom">E</text>
-          </g>
-          <g>
-            <rect class="leaf-box" x="145" y="240" width="90" height="56"/>
-            <line class="leaf-divider" x1="145" y1="268" x2="235" y2="268"/>
-            <text x="190" y="261" class="leaf-top">3</text>
-            <text x="190" y="291" class="leaf-bottom">A</text>
-          </g>
-          <g>
-            <rect class="leaf-box" x="265" y="240" width="90" height="56"/>
-            <line class="leaf-divider" x1="265" y1="268" x2="355" y2="268"/>
-            <text x="310" y="261" class="leaf-top">4</text>
-            <text x="310" y="291" class="leaf-bottom">D</text>
-          </g>
-          <g>
-            <rect class="leaf-box" x="385" y="240" width="90" height="56"/>
-            <line class="leaf-divider" x1="385" y1="268" x2="475" y2="268"/>
-            <text x="430" y="261" class="leaf-top">5</text>
-            <text x="430" y="291" class="leaf-bottom">B</text>
-          </g>
-          <g>
-            <rect class="leaf-box" x="505" y="240" width="90" height="56"/>
-            <line class="leaf-divider" x1="505" y1="268" x2="595" y2="268"/>
-            <text x="550" y="261" class="leaf-top">6</text>
-            <text x="550" y="291" class="leaf-bottom">C</text>
-          </g>
-        </svg>
-      </div>
-      <table class="plain">
-        <tr><th>Char</th><th>Count</th><th>Code</th></tr>
-        <tr><td>A</td><td>3</td><td>001</td></tr>
-        <tr><td>B</td><td>5</td><td>10</td></tr>
-        <tr><td>C</td><td>6</td><td>11</td></tr>
-        <tr><td>D</td><td>4</td><td>01</td></tr>
-        <tr><td>E</td><td>2</td><td>000</td></tr>
-      </table>
-    </div>
   </section>
 
   <section class="card">
@@ -528,16 +573,18 @@ buildGrid('knapTable',
 /* ---------- Part 3: Huffman data ---------- */
 const hChars = ['A','B','C','D','E'];
 const hFreq = {A:3, B:5, C:6, D:4, E:2};
-const hLen = {A:3, B:2, C:2, D:2, E:3};
+const hCodes = {A:'001', B:'10', C:'11', D:'01', E:'000'};
+const hNodeValues = {root:20, '9':9, '11':11, '5':5};
+const hEdgeValues = {
+  root9:'0', root11:'1',
+  '9_5':'0', '9_D':'1',
+  '5_E':'0', '5_A':'1',
+  '11_B':'0', '11_C':'1'
+};
 
 buildGrid('freqTable',
   hChars,
   [{label:'Count', cells: hChars.map(c => ({id: 'h_freq_' + c}))}]
-);
-
-buildGrid('lenTable',
-  hChars,
-  [{label:'Code length (bits)', cells: hChars.map(c => ({id: 'h_len_' + c}))}]
 );
 
 /* ---------- Section definitions for grading ---------- */
@@ -566,7 +613,9 @@ function section2Fields(){
 function section3Fields(){
   const fields = [];
   hChars.forEach(c => fields.push({kind:'number', id:'h_freq_' + c, expected:hFreq[c], tol:0.01}));
-  hChars.forEach(c => fields.push({kind:'number', id:'h_len_' + c, expected:hLen[c], tol:0.01}));
+  Object.keys(hNodeValues).forEach(k => fields.push({kind:'number', id:'h_node_' + k, expected:hNodeValues[k], tol:0.01}));
+  Object.keys(hEdgeValues).forEach(k => fields.push({kind:'text', id:'h_edge_' + k, expected:hEdgeValues[k]}));
+  hChars.forEach(c => fields.push({kind:'text', id:'h_code_' + c, expected:hCodes[c]}));
   fields.push({kind:'number', id:'h_msgbits', expected:45, tol:0.5});
   fields.push({kind:'number', id:'h_overhead', expected:52, tol:0.5});
   fields.push({kind:'number', id:'h_total', expected:97, tol:0.5});
@@ -580,7 +629,9 @@ function wrapperFor(field){
   const cellWrap = document.getElementById('cell_' + field.id);
   if(cellWrap) return cellWrap;
   const el = document.getElementById(field.id);
-  return el.closest('.field-row');
+  const row = el.closest('.field-row');
+  if(row) return row;
+  return el;
 }
 
 function gradeField(field){
@@ -590,6 +641,8 @@ function gradeField(field){
 
   if(field.kind === 'select'){
     ok = el.value === field.expected;
+  }else if(field.kind === 'text'){
+    ok = el.value.trim() === field.expected;
   }else{
     const n = parseNum(el.value);
     ok = n !== null && Math.abs(n - field.expected) <= field.tol;
@@ -627,9 +680,6 @@ function checkSection(num){
     box.textContent = 'You got ' + correctCount + ' out of ' + fields.length + ' correct. This part only allows one check, so this is your final score: ' + score + ' / 5.';
   }
 
-  if(num === 3){
-    document.getElementById('huffmanSolution').classList.add('show');
-  }
 }
 
 function updateTotal(){
