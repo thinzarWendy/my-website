@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Student Activity: 0/1 Knapsack Problem</title>
+<style>
+  :root{
+    --ink:#172033;
+    --muted:#5b6473;
+    --panel:#ffffff;
+    --page:#eef3f8;
+    --line:#cbd5e1;
+    --blue:#2563eb;
+    --blue2:#dbeafe;
+    --green:#059669;
+    --green2:#d1fae5;
+    --orange:#d97706;
+    --orange2:#fef3c7;
+    --red:#dc2626;
+    --red2:#fee2e2;
+    --purple:#7c3aed;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:var(--page);
+    color:var(--ink);
+    line-height:1.45;
+  }
+  .page{max-width:1100px;margin:24px auto;padding:0 18px 50px}
+  .hero{
+    background:linear-gradient(135deg,#7a1414,#dc2626);
+    color:white;
+    padding:26px 30px;
+    border-radius:18px;
+    box-shadow:0 10px 26px rgba(15,23,42,.18);
+  }
+  .hero h1{margin:0 0 8px;font-size:30px}
+  .hero p{margin:0;opacity:.95}
+  .card{
+    background:var(--panel);
+    border-radius:16px;
+    padding:22px;
+    margin-top:18px;
+    box-shadow:0 6px 18px rgba(15,23,42,.08);
+    border:1px solid #e5eaf0;
+  }
+  h2{margin:0 0 10px;font-size:22px}
+  h3{margin:14px 0 8px}
+  .student-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  label{font-weight:700;display:block;margin-bottom:6px}
+  input[type=text]{
+    padding:10px 11px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:15px;
+    background:white;
+  }
+  .student-grid input{width:100%}
+  .instruction{
+    background:var(--orange2);
+    border-left:5px solid var(--orange);
+    border-radius:10px;
+    padding:12px 14px;
+    margin:0 0 14px;
+  }
+  .problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  .total-weight{font-size:19px;font-weight:800;margin:0 0 12px}
+  table.items{border-collapse:collapse;width:100%;max-width:320px}
+  table.items th, table.items td{border:1px solid var(--line);padding:9px 14px;text-align:left}
+  table.items th{background:#eaf0f7}
+  .constraints{list-style:none;margin:0;padding:0}
+  .constraints li{
+    padding:9px 0 9px 22px;
+    position:relative;
+    font-size:15.5px;
+  }
+  .constraints li::before{content:"\25CF";position:absolute;left:0;color:var(--muted);font-size:11px;top:15px}
+  .how-it-works{
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    font-size:14.5px;
+  }
+  .how-it-works code{background:#eef2f8;padding:1px 6px;border-radius:5px}
+  .table-scroll{overflow-x:auto;margin-bottom:6px}
+  .axis-j{text-align:center;color:var(--blue);font-weight:800;margin:0 0 4px;padding-left:170px}
+  .dp-wrap{display:flex;align-items:stretch;gap:6px}
+  .axis-i{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--blue);
+    font-weight:800;
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+  }
+  table.dp{border-collapse:collapse;margin:0}
+  table.dp th, table.dp td{
+    border:1px solid var(--line);
+    padding:0;
+    text-align:center;
+    min-width:44px;
+    height:42px;
+  }
+  table.dp th{background:#eaf0f7;font-weight:800;padding:8px 6px}
+  table.dp td.ilabel{background:#fff;color:var(--blue);font-weight:800;border:none;width:22px}
+  table.dp td.fixed{background:#f8fafc;font-weight:700;color:var(--ink);padding:8px 10px}
+  .cell-input{
+    width:100%;
+    height:100%;
+    border:none;
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    background:transparent;
+    color:var(--ink);
+    font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  .cell-input:disabled{
+    background:transparent !important;
+    -webkit-text-fill-color:currentColor;
+    opacity:1;
+    cursor:not-allowed;
+  }
+  .cell-input:focus{outline:2px solid var(--blue);outline-offset:-2px}
+  td.correct{background:var(--green) !important}
+  td.correct .cell-input{color:#ffffff;font-weight:800}
+  td.wrong{background:var(--red) !important}
+  td.wrong .cell-input{color:#ffffff;font-weight:800}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 10px}
+  button{
+    border:1px solid #aeb9c8;
+    border-radius:10px;
+    padding:10px 16px;
+    background:#fff;
+    color:var(--ink);
+    font-weight:700;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  button:hover:not(:disabled){transform:translateY(-1px);background:#f8fafc}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.primary{background:var(--blue);color:white;border-color:var(--blue)}
+  button.success{background:var(--green);color:white;border-color:var(--green)}
+  button.toggle{background:#fff}
+  button.toggle.picked-yes{background:var(--green);color:#fff;border-color:var(--green)}
+  button.toggle.picked-no{background:#64748b;color:#fff;border-color:#64748b}
+  .score-pill{
+    font-weight:800;
+    padding:9px 16px;
+    border-radius:999px;
+    background:#f1f5f9;
+    border:2px solid var(--line);
+    color:var(--muted);
+  }
+  .score-pill.good{background:var(--green2);border-color:var(--green);color:#065f46}
+  .score-pill.bad{background:var(--red2);border-color:var(--red);color:#991b1b}
+  .feedback{
+    margin-top:10px;
+    padding:12px;
+    border-radius:10px;
+    display:none;
+    font-weight:600;
+  }
+  .feedback.good{display:block;background:var(--green2);border:1px solid #6ee7b7;color:#065f46}
+  .feedback.bad{display:block;background:var(--red2);border:1px solid #fca5a5;color:#991b1b}
+  .locked-banner{
+    background:#f1f5f9;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 14px;
+    margin-bottom:14px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  #part2Body{display:none}
+  #part2Body.unlocked{display:block}
+  .ref-table-wrap{overflow-x:auto;margin:10px 0 18px}
+  table.ref{border-collapse:collapse}
+  table.ref th, table.ref td{border:1px solid var(--line);padding:7px 10px;text-align:center;font-size:14px}
+  table.ref th{background:#eaf0f7;font-weight:800}
+  table.ref td.answer{font-weight:700}
+  .item-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    flex-wrap:wrap;
+    background:#f8fafc;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px 16px;
+    margin-bottom:10px;
+  }
+  .item-row.correct{background:var(--green2);border-color:var(--green)}
+  .item-row.wrong{background:var(--red2);border-color:var(--red)}
+  .item-info{font-weight:700}
+  .item-toggle{display:flex;gap:8px}
+  .live-stats{
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+    margin:14px 0;
+  }
+  .live-chip{
+    background:var(--blue2);
+    color:#1d4ed8;
+    font-weight:800;
+    padding:8px 16px;
+    border-radius:999px;
+    font-size:14.5px;
+  }
+  .live-chip.over{background:var(--red2);color:#991b1b}
+  .score-box{
+    background:#172033;
+    color:white;
+    border-radius:14px;
+    padding:18px;
+    text-align:center;
+    margin-top:6px;
+  }
+  .score-number{font-size:38px;font-weight:900}
+  .footer-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .note{color:var(--muted);font-size:14px}
+  @media(max-width:850px){
+    .student-grid,.problem-grid{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:white}
+    .page{max-width:none;margin:0;padding:0}
+    .hero,.card{box-shadow:none}
+    .controls,.footer-actions,.item-toggle{display:none !important}
+    .card{break-inside:avoid}
+    * {
+      -webkit-print-color-adjust:exact !important;
+      print-color-adjust:exact !important;
+    }
+  }
+</style>
+</head>
+
+<body>
+<div class="page">
+  <section class="hero">
+    <h1>Student Activity: 0/1 Knapsack Problem</h1>
+    <p>Fill in the dynamic programming table, check your work, then backtrack through it to find which items make up the optimal solution.</p>
+  </section>
+
+  <section class="card">
+    <h2>Student Information</h2>
+    <div class="student-grid">
+      <div>
+        <label for="studentName">Student Name</label>
+        <input id="studentName" type="text" placeholder="Enter your name">
+      </div>
+      <div>
+        <label for="studentId">Student ID</label>
+        <input id="studentId" type="text" placeholder="Enter your Student ID">
+      </div>
+      <div>
+        <label for="classSection">Class / Section</label>
+        <input id="classSection" type="text" placeholder="Enter class or section">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>The Problem</h2>
+    <div class="problem-grid">
+      <div>
+        <p class="total-weight">Total bag weight = 7</p>
+        <table class="items">
+          <thead><tr><th>Weight</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>1</td></tr>
+            <tr><td>3</td><td>4</td></tr>
+            <tr><td>4</td><td>5</td></tr>
+            <tr><td>5</td><td>7</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul class="constraints">
+        <li>One quantity of each item</li>
+        <li>Maximize value</li>
+        <li>Weight cannot be more than 7</li>
+        <li>Item cannot be fractionalized</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="instruction">
+      <strong>Instructions:</strong> Part 1 asks you to complete the DP table below &mdash; the V and W columns are already filled in for you. Part 2 unlocks once you check Part 1, and asks you to backtrack through the table to say which items belong in the optimal bag. <strong>Each part only allows one check</strong> &mdash; whatever score you get on that first check is final, so double-check everything before you press the button.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Part 1 — Complete the DP Table</h2>
+    <div class="how-it-works">
+      Row <code>i</code> considers only the first <code>i+1</code> items. Column <code>j</code> is the bag capacity used so far.
+      Rule: <code>dp[i][j] = dp[i-1][j]</code> if the item's weight is more than <code>j</code>, otherwise the larger of
+      <code>dp[i-1][j]</code> (leave the item out) and <code>value + dp[i-1][j-weight]</code> (take the item). Treat row <code>i-1</code> as all zeros when <code>i = 0</code>.
+    </div>
+    <p class="axis-j">j</p>
+    <div class="dp-wrap">
+      <div class="axis-i">i</div>
+      <div class="table-scroll" id="dpTableWrap"></div>
+    </div>
+    <div class="controls">
+      <button class="success" id="checkPart1Btn" onclick="checkPart1()">Check Table</button>
+      <span id="score1Pill" class="score-pill">Not checked yet</span>
+    </div>
+    <div id="feedback1" class="feedback"></div>
+  </section>
+
+  <section class="card">
+    <h2>Part 2 — Backtrack to Find the Selected Items</h2>
+    <div id="part2Locked" class="locked-banner">Check Part 1 first to unlock this section.</div>
+    <div id="part2Body">
+      <div class="how-it-works">
+        Start at the bottom row (the last item) at <code>j = 7</code>. If that cell's value is the <em>same</em> as the cell directly above it, the item was skipped &mdash; move straight up. If it is <em>different</em>, the item was taken &mdash; move up and left by that item's weight. The reference table below (filled in automatically) shows the correct numbers so a mistake in Part 1 does not carry over.
+      </div>
+      <div class="ref-table-wrap">
+        <table class="ref" id="refTableWrap"></table>
+      </div>
+      <h3>For each item, was it included in the optimal bag?</h3>
+      <div id="itemRows"></div>
+      <div class="live-stats">
+        <span class="live-chip" id="liveWeight">Selected weight: 0 / 7</span>
+        <span class="live-chip" id="liveValue">Selected value: 0</span>
+      </div>
+      <div class="controls">
+        <button class="success" id="checkPart2Btn" onclick="checkPart2()">Check Backtracking</button>
+        <span id="score2Pill" class="score-pill">Not checked yet</span>
+      </div>
+      <div id="feedback2" class="feedback"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Activity Score</h2>
+    <div class="score-box">
+      <div>Your total score</div>
+      <div class="score-number"><span id="totalScore">0</span> / 10</div>
+      <div>Part 1: 5 marks &nbsp; | &nbsp; Part 2: 5 marks</div>
+    </div>
+    <div class="footer-actions">
+      <button class="primary" onclick="window.print()">Download as PDF</button>
+    </div>
+    <p class="note">To download: press "Download as PDF", then choose "Save as PDF" (or "Microsoft Print to PDF") as the destination in the print dialog, and save the file to your computer.</p>
+  </section>
+</div>
+
+<script>
+/* ---------- Problem data ---------- */
+const items = [
+  {w:1, v:1},
+  {w:3, v:4},
+  {w:4, v:5},
+  {w:5, v:7}
+];
+const capacity = 7;
+const n = items.length;
+
+/* ---------- DP calculation ---------- */
+function knapsackTable(items, capacity){
+  const rows = items.length;
+  const dp = Array.from({length:rows}, () => new Array(capacity+1).fill(0));
+  for(let i=0;i<rows;i++){
+    const {w, v} = items[i];
+    for(let j=0;j<=capacity;j++){
+      const prev = i===0 ? 0 : dp[i-1][j];
+      let withItem = -Infinity;
+      if(j>=w){
+        const prevRemainder = i===0 ? 0 : dp[i-1][j-w];
+        withItem = v + prevRemainder;
+      }
+      dp[i][j] = Math.max(prev, withItem);
+    }
+  }
+  return dp;
+}
+
+function backtrackItems(dp, items, capacity){
+  let i = items.length - 1, j = capacity;
+  const selected = new Array(items.length).fill(false);
+  while(i>=0 && j>0){
+    const prev = i===0 ? 0 : dp[i-1][j];
+    if(dp[i][j] !== prev){
+      selected[i] = true;
+      j -= items[i].w;
+    }
+    i--;
+  }
+  return selected;
+}
+
+const correctDp = knapsackTable(items, capacity);
+const correctSelected = backtrackItems(correctDp, items, capacity);
+
+/* ---------- Part 1: build the fill-in DP table ---------- */
+function buildDpTable(){
+  let html = '<table class="dp" id="dpTable"><thead><tr><th>V</th><th>W</th>';
+  for(let j=0;j<=capacity;j++) html += '<th>' + j + '</th>';
+  html += '</tr></thead><tbody>';
+  for(let i=0;i<n;i++){
+    html += '<tr><td class="fixed">' + items[i].v + '</td><td class="fixed">' + items[i].w + '</td>';
+    for(let j=0;j<=capacity;j++){
+      const id = 'd_r' + i + '_c' + j;
+      html += '<td id="cell_' + id + '"><input class="cell-input" id="' + id + '" type="text" inputmode="numeric" autocomplete="off" aria-label="Row ' + i + ', capacity ' + j + '"></td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('dpTableWrap').innerHTML = html;
+}
+buildDpTable();
+
+let score1 = 0, score2 = 0;
+let locked1 = false, locked2 = false;
+
+function checkPart1(){
+  if(locked1) return;
+
+  let total = 0, correctCount = 0;
+  for(let i=0;i<n;i++){
+    for(let j=0;j<=capacity;j++){
+      total++;
+      const id = 'd_r' + i + '_c' + j;
+      const input = document.getElementById(id);
+      const cell = document.getElementById('cell_' + id);
+      const expected = correctDp[i][j];
+      const typed = input.value.trim();
+      const isCorrect = typed !== '' && /^-?\d+$/.test(typed) && Number(typed) === expected;
+      cell.classList.remove('correct','wrong');
+      cell.classList.add(isCorrect ? 'correct' : 'wrong');
+      if(isCorrect) correctCount++;
+      input.disabled = true;
+    }
+  }
+
+  const score = Math.round((correctCount/total) * 5 * 10) / 10;
+  score1 = score;
+  updateTotal();
+  locked1 = true;
+  document.getElementById('checkPart1Btn').disabled = true;
+
+  const pill = document.getElementById('score1Pill');
+  pill.textContent = 'Final score: ' + score + ' / 5';
+  pill.className = 'score-pill ' + (score===5 ? 'good' : 'bad');
+
+  const box = document.getElementById('feedback1');
+  if(score===5){
+    box.className = 'feedback good';
+    box.textContent = 'Excellent! Every cell in the table is correct. Final score: 5 / 5.';
+  }else{
+    box.className = 'feedback bad';
+    box.textContent = 'You got ' + correctCount + ' out of ' + total + ' cells correct. This table only allows one check, so this is your final score: ' + score + ' / 5.';
+  }
+
+  unlockPart2();
+}
+
+/* ---------- Part 2: backtracking ---------- */
+function buildRefTable(){
+  let html = '<thead><tr><th>V</th><th>W</th>';
+  for(let j=0;j<=capacity;j++) html += '<th>' + j + '</th>';
+  html += '</tr></thead><tbody>';
+  for(let i=0;i<n;i++){
+    html += '<tr><td>' + items[i].v + '</td><td>' + items[i].w + '</td>';
+    for(let j=0;j<=capacity;j++){
+      html += '<td class="answer">' + correctDp[i][j] + '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody>';
+  document.getElementById('refTableWrap').innerHTML = html;
+}
+
+function buildItemRows(){
+  let html = '';
+  for(let i=0;i<n;i++){
+    html += '<div class="item-row" id="itemRow' + i + '">' +
+      '<span class="item-info">Item ' + (i+1) + ': Weight = ' + items[i].w + ', Value = ' + items[i].v + '</span>' +
+      '<span class="item-toggle">' +
+      '<button type="button" class="toggle" id="yes' + i + '" onclick="pickItem(' + i + ',true)">Include</button>' +
+      '<button type="button" class="toggle" id="no' + i + '" onclick="pickItem(' + i + ',false)">Skip</button>' +
+      '</span></div>';
+  }
+  document.getElementById('itemRows').innerHTML = html;
+}
+
+const picks = new Array(n).fill(null);
+
+function pickItem(i, include){
+  if(locked2) return;
+  picks[i] = include;
+  document.getElementById('yes' + i).classList.toggle('picked-yes', include===true);
+  document.getElementById('no' + i).classList.toggle('picked-no', include===false);
+  updateLiveStats();
+}
+
+function updateLiveStats(){
+  let w = 0, v = 0;
+  for(let i=0;i<n;i++){
+    if(picks[i]){ w += items[i].w; v += items[i].v; }
+  }
+  const weightChip = document.getElementById('liveWeight');
+  weightChip.textContent = 'Selected weight: ' + w + ' / ' + capacity;
+  weightChip.className = 'live-chip' + (w>capacity ? ' over' : '');
+  document.getElementById('liveValue').textContent = 'Selected value: ' + v;
+}
+
+function unlockPart2(){
+  buildRefTable();
+  buildItemRows();
+  document.getElementById('part2Locked').style.display = 'none';
+  document.getElementById('part2Body').classList.add('unlocked');
+}
+
+function checkPart2(){
+  if(locked2) return;
+
+  let correctCount = 0;
+  for(let i=0;i<n;i++){
+    const row = document.getElementById('itemRow' + i);
+    const isCorrect = picks[i] === correctSelected[i];
+    row.classList.remove('correct','wrong');
+    row.classList.add(isCorrect ? 'correct' : 'wrong');
+    if(isCorrect) correctCount++;
+    document.getElementById('yes' + i).disabled = true;
+    document.getElementById('no' + i).disabled = true;
+  }
+
+  const score = Math.round((correctCount/n) * 5 * 10) / 10;
+  score2 = score;
+  updateTotal();
+  locked2 = true;
+  document.getElementById('checkPart2Btn').disabled = true;
+
+  const pill = document.getElementById('score2Pill');
+  pill.textContent = 'Final score: ' + score + ' / 5';
+  pill.className = 'score-pill ' + (score===5 ? 'good' : 'bad');
+
+  const box = document.getElementById('feedback2');
+  if(score===5){
+    box.className = 'feedback good';
+    box.textContent = 'Excellent! You correctly identified every item. Final score: 5 / 5.';
+  }else{
+    box.className = 'feedback bad';
+    box.textContent = 'You got ' + correctCount + ' out of ' + n + ' items correct. This section only allows one check, so this is your final score: ' + score + ' / 5.';
+  }
+}
+
+function updateTotal(){
+  const total = Math.round((score1 + score2) * 10) / 10;
+  document.getElementById('totalScore').textContent = total;
+}
+</script>
+</body>
+</html>
