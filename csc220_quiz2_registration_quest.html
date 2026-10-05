@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSC220 Quiz 2 — Registration Quest</title>
+<style>
+/* ============================================================
+   CSC220 Web Development II — Quiz 2: Registration Quest
+   Stamford International University
+   Single-file, no dependencies. Works offline / GitHub Pages.
+   ============================================================ */
+
+:root{
+  --bg:#ffffff; --soft:#f7f7f3; --tint:#fdf6dc; --tint-line:#efe3ac;
+  --ink:#1b1f2a; --text:#2a303a; --muted:#6a7380; --line:#e5e7eb;
+  --yellow:#f0db4f; --yellow-deep:#d9be1b;
+  --ok:#2c5f2d; --ok-bg:#eaf3e8; --ok-line:#cfe2cb;
+  --bad:#a33a2b; --bad-bg:#fbecea; --bad-line:#f0d6d1;
+  --code-bg:#f6f8fa; --code-line:#e1e4e8;
+  --mono:"Courier New",Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  --radius:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans); color:var(--text); background:var(--soft);
+  line-height:1.55; -webkit-text-size-adjust:100%;
+}
+
+/* ---------- top band + header ---------- */
+.band{height:6px;background:var(--yellow)}
+header.site{
+  background:var(--bg); border-bottom:1px solid var(--line);
+  padding:14px 18px;
+}
+.site-in{max-width:980px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{
+  width:44px;height:44px;flex:0 0 44px;background:var(--yellow);color:var(--ink);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:17px;letter-spacing:.5px;
+}
+.site-t{font-weight:800;color:var(--ink);font-size:17px;line-height:1.25}
+.site-s{font-size:12.5px;color:var(--muted)}
+.hud{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{
+  background:var(--soft);border:1px solid var(--line);border-radius:999px;
+  padding:6px 13px;font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;
+}
+.pill b{color:var(--yellow-deep)}
+
+/* ---------- layout ---------- */
+main{max-width:980px;margin:0 auto;padding:22px 18px 70px}
+.card{
+  background:var(--bg);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin-bottom:18px;
+}
+h1{font-size:28px;line-height:1.2;margin:0 0 6px;color:var(--ink)}
+h2{font-size:21px;margin:0 0 6px;color:var(--ink)}
+h3{font-size:16px;margin:22px 0 8px;color:var(--ink)}
+p{margin:0 0 12px}
+.lead{color:var(--muted);font-size:15px}
+.kick{
+  font-size:11.5px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:8px;
+}
+.rule{height:4px;width:54px;background:var(--yellow);border-radius:3px;margin:10px 0 18px}
+.hide{display:none !important}
+
+/* ---------- buttons ---------- */
+button{font-family:inherit}
+.btn{
+  background:var(--ink);color:#fff;border:0;border-radius:9px;
+  padding:12px 22px;font-size:15px;font-weight:700;cursor:pointer;
+}
+.btn:hover{background:#2a3040}
+.btn:disabled{background:#c6cbd3;cursor:not-allowed}
+.btn.alt{background:var(--yellow);color:var(--ink)}
+.btn.alt:hover{background:var(--yellow-deep)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:var(--soft)}
+.btn.sm{padding:9px 16px;font-size:13.5px}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+/* ---------- forms ---------- */
+label.f{display:block;font-weight:700;font-size:13.5px;color:var(--ink);margin:14px 0 5px}
+input.f{
+  width:100%;padding:11px 13px;font-size:15px;font-family:inherit;
+  border:1.5px solid var(--line);border-radius:9px;background:var(--bg);color:var(--text);
+}
+input.f:focus{outline:0;border-color:var(--yellow-deep)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grid2{grid-template-columns:1fr}}
+
+/* ---------- note boxes ---------- */
+.note{
+  background:var(--tint);border:1px solid var(--tint-line);border-radius:10px;
+  padding:13px 16px;font-size:14px;margin:14px 0;
+}
+.note.grey{background:var(--soft);border-color:var(--line)}
+.note.red{background:var(--bad-bg);border-color:var(--bad-line)}
+
+/* ---------- quest map ---------- */
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+@media(max-width:700px){.map{grid-template-columns:repeat(2,1fr)}}
+.stn{
+  background:var(--soft);border:1px solid var(--line);border-radius:11px;
+  padding:14px 12px;text-align:center;position:relative;
+}
+.stn .ic{font-size:27px;line-height:1}
+.stn .nm{font-weight:800;font-size:13.5px;color:var(--ink);margin-top:6px}
+.stn .wk{font-size:11.5px;color:var(--muted);margin-top:2px}
+.stn .pts{font-size:11.5px;color:var(--yellow-deep);font-weight:800;margin-top:5px}
+.stn.now{background:var(--tint);border-color:var(--tint-line)}
+.stn.done{background:var(--ok-bg);border-color:var(--ok-line)}
+.stn.done .nm{color:var(--ok)}
+.stn .tick{position:absolute;top:7px;right:9px;font-size:14px;color:var(--ok);font-weight:800}
+
+/* ---------- progress ---------- */
+.bar{height:9px;background:var(--line);border-radius:999px;overflow:hidden;margin:16px 0 4px}
+.bar i{display:block;height:100%;background:var(--yellow);width:0;transition:width .45s ease}
+
+/* ---------- question ---------- */
+.q{border-top:1px solid var(--line);padding-top:20px;margin-top:22px}
+.q:first-of-type{border-top:0;padding-top:4px;margin-top:10px}
+.qhead{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px}
+.qno{
+  background:var(--ink);color:var(--yellow);font-weight:800;font-size:12px;
+  border-radius:999px;padding:3px 11px;white-space:nowrap;
+}
+.qpt{font-size:12.5px;font-weight:800;color:var(--yellow-deep);margin-left:auto;white-space:nowrap}
+.qtext{font-size:15.5px;color:var(--ink);font-weight:600;margin:6px 0 12px}
+.qsub{font-size:13.5px;color:var(--muted);margin:-6px 0 12px}
+
+/* ---------- code block ---------- */
+.code{
+  background:var(--code-bg);border:1px solid var(--code-line);border-radius:10px;
+  padding:14px 16px;font-family:var(--mono);font-size:13px;overflow-x:auto;
+  white-space:pre;margin:10px 0 14px;line-height:1.65;color:var(--ink);
+}
+.code .cm{color:#9aa0a8;font-style:italic}
+.code .st{color:#50a14f}
+.code .kw{color:#a626a4}
+
+/* ---------- token builder ---------- */
+.slotbox{
+  border:2px dashed var(--line);border-radius:10px;background:var(--code-bg);
+  min-height:62px;padding:11px;display:flex;flex-wrap:wrap;gap:7px;align-items:center;
+  font-family:var(--mono);font-size:13px;
+}
+.slotbox.filled{border-style:solid;border-color:var(--yellow-deep);background:#fffdf2}
+.slotbox .ph{color:#aab0b9;font-family:var(--sans);font-size:13.5px}
+.tok{
+  background:var(--bg);border:1.5px solid var(--line);border-radius:8px;
+  padding:7px 11px;font-family:var(--mono);font-size:12.5px;color:var(--ink);
+  cursor:pointer;user-select:none;
+}
+.tok:hover{border-color:var(--yellow-deep);background:#fffdf2}
+.tok.used{opacity:.3;pointer-events:none}
+.tok.inslot{background:var(--tint);border-color:var(--tint-line)}
+.tokrow{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}
+.tokhint{font-size:12.5px;color:var(--muted);margin-top:9px}
+
+/* ---------- option buttons ---------- */
+.subq{margin:14px 0 0;padding:13px 15px;background:var(--soft);border:1px solid var(--line);border-radius:10px}
+.subq .sq{font-size:14.5px;color:var(--ink);font-weight:600;margin-bottom:9px}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{
+  background:var(--bg);border:1.5px solid var(--line);border-radius:9px;
+  padding:9px 14px;font-size:13.5px;cursor:pointer;color:var(--text);text-align:left;
+}
+.opt:hover{border-color:var(--yellow-deep)}
+.opt.sel{background:var(--tint);border-color:var(--yellow-deep);font-weight:700;color:var(--ink)}
+.opt code,.opt .m{font-family:var(--mono);font-size:12.5px}
+.opts.stack{flex-direction:column}
+.opts.stack .opt{width:100%}
+.opts.codes .opt{min-width:74px;text-align:center;font-family:var(--mono);font-weight:700}
+
+/* ---------- bug hunt lines ---------- */
+.hunt{
+  background:var(--code-bg);border:1px solid var(--code-line);border-radius:10px;
+  overflow:hidden;margin:10px 0 6px;
+}
+.hl{
+  display:flex;gap:12px;padding:5px 14px;font-family:var(--mono);font-size:12.5px;
+  cursor:pointer;border-left:4px solid transparent;white-space:pre;overflow-x:auto;
+}
+.hl:hover{background:#eef1f5}
+.hl .ln{color:#aab0b9;flex:0 0 22px;text-align:right;user-select:none}
+.hl.pick{background:var(--tint);border-left-color:var(--yellow-deep)}
+.hl.nopick{cursor:default;opacity:.85}
+.hl.nopick:hover{background:transparent}
+
+/* ---------- bins ---------- */
+.binq{margin:12px 0;padding:13px 15px;background:var(--soft);border:1px solid var(--line);border-radius:10px;
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.binq .bt{flex:1 1 300px;font-size:14.5px;color:var(--ink)}
+.binq .opts{flex:0 0 auto}
+
+/* ---------- feedback ---------- */
+.fb{border-radius:10px;padding:12px 15px;margin-top:12px;font-size:13.5px;border:1px solid}
+.fb.good{background:var(--ok-bg);border-color:var(--ok-line);color:var(--ok)}
+.fb.bad{background:var(--bad-bg);border-color:var(--bad-line);color:var(--bad)}
+.fb b{display:block;margin-bottom:3px;font-size:14px}
+.fb .why{color:var(--text);margin-top:5px}
+.locked{opacity:.95;pointer-events:none}
+
+/* ---------- result ---------- */
+.score{
+  text-align:center;background:var(--tint);border:1px solid var(--tint-line);
+  border-radius:14px;padding:26px 18px;margin-bottom:18px;
+}
+.score .big{font-size:58px;font-weight:800;color:var(--ink);line-height:1}
+.score .of{font-size:17px;color:var(--muted);margin-top:4px}
+.score .grade{
+  display:inline-block;margin-top:12px;background:var(--ink);color:var(--yellow);
+  padding:7px 20px;border-radius:999px;font-weight:800;font-size:14px;
+}
+table.br{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px}
+table.br th,table.br td{border:1px solid var(--line);padding:9px 12px;text-align:left}
+table.br th{background:var(--ink);color:#fff;font-size:13px}
+table.br td.n{text-align:center;font-weight:800;width:92px}
+.subcode{
+  font-family:var(--mono);font-size:19px;font-weight:700;letter-spacing:2px;
+  background:var(--code-bg);border:1px dashed var(--code-line);border-radius:9px;
+  padding:13px;text-align:center;color:var(--ink);margin:8px 0 4px;
+}
+.rev{border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:10px;font-size:13.5px}
+.rev.ok{border-left:4px solid var(--ok)}
+.rev.no{border-left:4px solid var(--bad)}
+.rev .rh{font-weight:700;color:var(--ink);margin-bottom:4px}
+
+footer.site{text-align:center;color:var(--muted);font-size:12.5px;padding:0 18px 40px}
+
+/* ---------- integrity toast + lockdown ---------- */
+#itToast{
+  position:fixed; left:50%; bottom:-140px; transform:translateX(-50%);
+  background:var(--ink); color:#fff; border-radius:11px; padding:13px 20px;
+  font-size:13.5px; font-weight:700; box-shadow:0 10px 26px rgba(0,0,0,.28);
+  z-index:9999; max-width:92vw; text-align:center; transition:bottom .25s ease;
+  pointer-events:none;
+}
+#itToast.show{ bottom:22px; }
+#itToast b{ color:var(--yellow); }
+
+#itLock{
+  display:none; position:fixed; inset:0; z-index:10000;
+  background:rgba(20,22,28,.97); color:#fff;
+  align-items:center; justify-content:center; padding:24px;
+}
+#itLock.show{ display:flex; }
+
+body.it-frozen main{ pointer-events:none; user-select:none; filter:saturate(.3) brightness(.9); }
+.lockcard{
+  max-width:520px; width:100%; background:#1b1f2a; border:1px solid #333a46;
+  border-radius:16px; padding:30px 28px; text-align:center;
+}
+.lockcard .licon{font-size:44px;margin-bottom:6px}
+.lockcard h2{color:#fff;margin:0 0 10px;font-size:22px}
+.lockcard p{color:#b7bdc8;font-size:14.5px;margin:0 0 10px}
+.lockcard .lcode{
+  font-family:var(--mono); background:#11141c; border:1px dashed #333a46;
+  border-radius:9px; padding:10px; margin:14px 0; font-size:13px; color:#d7dbe3;
+}
+.lockcard .btn{margin-top:6px}
+
+.cheatband{
+  background:var(--bad-bg); border:1px solid var(--bad-line); color:var(--bad);
+  border-radius:11px; padding:14px 16px; margin-bottom:16px; font-size:14px;
+}
+.cheatband b{display:block;margin-bottom:3px;font-size:15px}
+
+.resumeband{
+  background:var(--soft); border:1px solid var(--line); color:var(--text);
+  border-radius:11px; padding:14px 16px; margin-bottom:16px; font-size:14px;
+}
+
+@media print{
+  .noprint{display:none !important}
+  body{background:#fff}
+  .card{border:1px solid #ccc;break-inside:avoid}
+  #itToast,#itLock{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<div id="itToast" class="noprint" role="status" aria-live="polite"></div>
+
+<div id="itLock" class="noprint" role="alertdialog" aria-live="assertive">
+  <div class="lockcard">
+    <div class="licon">🚫</div>
+    <h2>This attempt has been locked</h2>
+    <p id="itLockMsg">Repeated screenshot, printing, copying or keyboard-shortcut attempts were
+      detected during this quiz, so it has been flagged for suspected cheating.</p>
+    <p>Only what you had answered so far will be scored. Press the button below to see and submit
+      your report.</p>
+    <div class="lcode" id="itLockCount">Violations detected: 0 / 3 allowed</div>
+    <button class="btn alt" id="itLockContinue">See my mission report →</button>
+  </div>
+</div>
+
+<div class="band"></div>
+<header class="site">
+  <div class="site-in">
+    <div class="logo">JS</div>
+    <div>
+      <div class="site-t">CSC220 Web Development II — Quiz 2</div>
+      <div class="site-s">Registration Quest · Stamford International University · 2026</div>
+    </div>
+    <div class="hud" id="hud">
+      <span class="pill">⭐ <b id="hudScore">0</b> / 25</span>
+      <span class="pill">📍 Station <b id="hudStn">–</b></span>
+      <span class="pill">⏱ <b id="hudTime">00:00</b></span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ SCREEN 1: START ============ -->
+  <section id="scStart">
+    <div class="card">
+      <div class="kick">Week 11 · Quiz 2 · Individual</div>
+      <h1>🎓 Registration Quest</h1>
+      <div class="rule"></div>
+      <p class="lead">
+        The university needs a new Course Registration System and you are the developer on duty.
+        Travel through four stations — the data vault, the API gateway, the security gate and the
+        component lab — and prove you can build it. Everything you need you already learned in
+        <strong>Weeks 7 to 10</strong>.
+      </p>
+
+      <div class="map" id="mapStart"></div>
+
+      <h3>How it works</h3>
+      <p class="lead" style="margin-bottom:10px">
+        Ten challenges across four stations. Total <strong>25 points</strong>.
+        You answer every challenge in a station, then press <em>Lock station</em> to commit your
+        answers and see how you did. <strong>You cannot go back to a locked station</strong>, so check
+        your work before locking.
+      </p>
+      <div class="note">
+        <strong>Before you begin:</strong> closed book · no notes, phones or other tabs ·
+        work alone. Type your real name and student ID below — they appear on your result card,
+        which is what you submit.
+      </div>
+
+      <div class="grid2">
+        <div>
+          <label class="f" for="inName">Full name</label>
+          <input class="f" id="inName" placeholder="e.g. Ploy Siriwan" autocomplete="off">
+        </div>
+        <div>
+          <label class="f" for="inId">Student ID</label>
+          <input class="f" id="inId" placeholder="e.g. 2026001234" autocomplete="off">
+        </div>
+      </div>
+      <div id="startErr" class="note red hide">Please enter both your name and your student ID.</div>
+
+      <div class="btnrow">
+        <button class="btn alt" id="btnStart">Begin the quest →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2: STATION ============ -->
+  <section id="scStation" class="hide">
+    <div class="card">
+      <div class="map" id="mapRun"></div>
+      <div class="bar"><i id="barFill"></i></div>
+      <div style="font-size:12.5px;color:var(--muted)" id="barTxt">Station 1 of 4</div>
+    </div>
+
+    <div class="card" id="stnCard">
+      <div class="kick" id="stnKick">Station</div>
+      <h2 id="stnName">—</h2>
+      <div class="rule"></div>
+      <p class="lead" id="stnBrief">—</p>
+      <div id="qWrap"></div>
+      <div id="stnFb"></div>
+      <div class="btnrow noprint">
+        <button class="btn" id="btnLock">🔒 Lock station</button>
+        <button class="btn alt hide" id="btnNext">Next station →</button>
+        <span id="lockWarn" style="font-size:13px;color:var(--muted);align-self:center"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3: RESULT ============ -->
+  <section id="scDone" class="hide">
+    <div class="card">
+      <div class="kick">Quest complete</div>
+      <h1 id="doneTitle">🏁 Mission report</h1>
+      <div class="rule"></div>
+
+      <div id="cheatBand" class="cheatband hide">
+        <b>⚠ Flagged for suspected cheating</b>
+        This attempt was locked after repeated screenshot, printing, copying or keyboard-shortcut
+        attempts during the quiz. Only what you had answered before the lockout was scored.
+        Download or print this report and show it to your lecturer.
+      </div>
+
+      <div id="resumeBand" class="resumeband hide">
+        This device already has a submitted attempt for this quiz, so it opened straight to your
+        result — you cannot take it again from here.
+      </div>
+
+      <div class="score">
+        <div class="big" id="finalScore">0</div>
+        <div class="of">out of 25 points</div>
+        <div class="grade" id="finalGrade">—</div>
+      </div>
+
+      <table class="br">
+        <thead><tr><th>Station</th><th>Covers</th><th class="n">Score</th></tr></thead>
+        <tbody id="brBody"></tbody>
+        <tfoot><tr>
+          <th colspan="2" style="background:var(--soft);color:var(--ink)">Total</th>
+          <th class="n" style="background:var(--soft);color:var(--ink)" id="brTotal">0 / 25</th>
+        </tr></tfoot>
+      </table>
+
+      <h3>Your submission</h3>
+      <p class="lead" style="margin-bottom:6px">
+        Candidate <strong id="outName">—</strong> · ID <strong id="outId">—</strong> ·
+        time taken <strong id="outTime">—</strong>
+      </p>
+      <div class="subcode" id="subCode">—</div>
+      <p class="lead" style="font-size:13px">
+        Submit your result the way your lecturer asked: download the file below, or take a
+        screenshot of this card showing your name, score and submission code.
+      </p>
+      <div class="btnrow noprint">
+        <button class="btn" id="btnDl">⬇ Download result file</button>
+        <button class="btn ghost" id="btnPrint">🖨 Print / save as PDF</button>
+        <button class="btn ghost" id="btnReview">📋 Show answer review</button>
+      </div>
+    </div>
+
+    <div class="card hide" id="revCard">
+      <div class="kick">Answer review</div>
+      <h2>What the system expected</h2>
+      <div class="rule"></div>
+      <div id="revBody"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site">
+  CSC220 Web Development II · Lecturer: Thinzar Aung Win · Stamford International University @2026
+</footer>
+
+<script>
+/* ==================================================================
+   QUESTION BANK — content is bundled in an encoded form below so a
+   simple "fetch this URL and read the text" tool (the common way a
+   chatbot is asked to answer a quiz from a pasted link) sees only
+   scrambled bytes, not the questions or answers. A real browser
+   decodes it the same way the student's browser does, right here.
+
+   This is NOT encryption — the key sits in this same file, so anyone
+   who reads this script (or opens dev tools) can decode it by hand.
+   It only stops a tool that fetches the raw page without running
+   its JavaScript.
+
+   To edit the quiz: ask Claude to update the questions in this file
+   and regenerate the encoded blob — this file is maintained through
+   that workflow rather than by hand-editing the blob below.
+
+   Types:
+     order  : click tokens in the correct sequence  (all-or-nothing)
+     choice : one or more sub-questions, one answer each (per-item points)
+     hunt   : click the faulty lines (per-target point, false picks subtract)
+     bins   : assign each item to a category (per-item point)
+   Points per station must add up to 25 overall.
+   ================================================================== */
+const QUIZ_KEY = "CSC220-W11-regq-k7v2";
+const QUIZ_BLOB = "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";
+
+function qb64ToBytes(b64){
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}
+function qXor(bytes, key){
+  const keyBytes = new TextEncoder().encode(key);
+  const out = new Uint8Array(bytes.length);
+  for(let i=0;i<bytes.length;i++) out[i] = bytes[i] ^ keyBytes[i % keyBytes.length];
+  return out;
+}
+function qDecode(b64, key){
+  return new TextDecoder().decode(qXor(qb64ToBytes(b64), key));
+}
+const QUIZ = JSON.parse(qDecode(QUIZ_BLOB, QUIZ_KEY));
+
+/* ================= ENGINE ================= */
+const $ = id => document.getElementById(id);
+const state = { name:"", id:"", stn:0, answers:{}, scores:[], started:0, elapsed:0, timer:null, cheatFlag:false };
+
+const TOTAL = QUIZ.reduce((a,s)=>a+s.pts,0);
+
+/* ---- quest map ---- */
+function drawMap(el, cur){
+  el.innerHTML = QUIZ.map((s,i)=>{
+    const cls = i<cur ? "done" : (i===cur ? "now" : "");
+    const tick = i<cur ? '<div class="tick">✓</div>' : "";
+    return `<div class="stn ${cls}">${tick}
+      <div class="ic">${s.icon}</div>
+      <div class="nm">${s.name}</div>
+      <div class="wk">${s.week}</div>
+      <div class="pts">${i<cur ? state.scores[i]+" / "+s.pts : s.pts+" pts"}</div>
+    </div>`;
+  }).join("");
+}
+
+/* ---- timer ---- */
+function fmt(sec){
+  const m = String(Math.floor(sec/60)).padStart(2,"0");
+  const s = String(sec%60).padStart(2,"0");
+  return m+":"+s;
+}
+function tick(){
+  state.elapsed = Math.floor((Date.now()-state.started)/1000);
+  $("hudTime").textContent = fmt(state.elapsed);
+}
+
+/* ---- start ---- */
+drawMap($("mapStart"), -1);
+$("btnStart").onclick = () => {
+  if(alreadySubmitted) return; // this device already has a saved attempt; refuse even if triggered directly
+  const n = $("inName").value.trim(), i = $("inId").value.trim();
+  if(!n || !i){ $("startErr").classList.remove("hide"); return; }
+  state.name = n; state.id = i;
+  state.started = Date.now();
+  state.timer = setInterval(tick,1000); tick();
+  monitoring = true;
+  $("scStart").classList.add("hide");
+  $("scStation").classList.remove("hide");
+  renderStation();
+};
+
+/* ---- render one station ---- */
+function renderStation(){
+  const s = QUIZ[state.stn];
+  drawMap($("mapRun"), state.stn);
+  $("barFill").style.width = ((state.stn+0.5)/QUIZ.length*100)+"%";
+  $("barTxt").textContent = `Station ${state.stn+1} of ${QUIZ.length} — ${s.pts} points available`;
+  $("hudStn").textContent = (state.stn+1)+" / "+QUIZ.length;
+  $("stnKick").textContent = `Station ${state.stn+1} · ${s.week}`;
+  $("stnName").textContent = `${s.icon}  ${s.name}`;
+  $("stnBrief").textContent = s.brief;
+  $("stnFb").innerHTML = "";
+  $("btnLock").classList.remove("hide");
+  $("btnNext").classList.add("hide");
+  $("lockWarn").textContent = "";
+
+  const w = $("qWrap"); w.innerHTML = ""; w.classList.remove("locked");
+  s.questions.forEach((q,qi)=>{
+    const d = document.createElement("div");
+    d.className = "q"; d.id = "box_"+q.id;
+    d.innerHTML = `<div class="qhead">
+        <span class="qno">Challenge ${qi+1}</span>
+        <span class="qpt">${q.points} ${q.points===1?"point":"points"}</span>
+      </div>
+      <div class="qtext">${q.text}</div>
+      ${q.sub?`<div class="qsub">${q.sub}</div>`:""}
+      <div id="body_${q.id}"></div>`;
+    w.appendChild(d);
+    ({order:rOrder, choice:rChoice, hunt:rHunt, bins:rBins})[q.type](q);
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ---- type: order ---- */
+function rOrder(q){
+  state.answers[q.id] = [];
+  const b = $("body_"+q.id);
+  b.innerHTML = `<div class="slotbox" id="slot_${q.id}"><span class="ph">Click the pieces below to build your query here…</span></div>
+    <div class="tokrow" id="pool_${q.id}"></div>
+    <div class="tokhint">Click a piece in the answer box to remove it.</div>`;
+  const pool = $("pool_"+q.id);
+  q.tokens.forEach((t,i)=>{
+    const el = document.createElement("div");
+    el.className="tok"; el.textContent=t; el.dataset.i=i;
+    el.onclick = ()=>{ state.answers[q.id].push(i); paintOrder(q); };
+    pool.appendChild(el);
+  });
+}
+function paintOrder(q){
+  const slot = $("slot_"+q.id), pool = $("pool_"+q.id);
+  const a = state.answers[q.id];
+  [...pool.children].forEach((c,i)=> c.classList.toggle("used", a.includes(i)));
+  if(!a.length){ slot.className="slotbox"; slot.innerHTML='<span class="ph">Click the pieces below to build your query here…</span>'; return; }
+  slot.className="slotbox filled"; slot.innerHTML="";
+  a.forEach((ti,pos)=>{
+    const el=document.createElement("div");
+    el.className="tok inslot"; el.textContent=q.tokens[ti];
+    el.onclick=()=>{ a.splice(pos,1); paintOrder(q); };
+    slot.appendChild(el);
+  });
+}
+
+/* ---- type: choice ---- */
+function rChoice(q){
+  state.answers[q.id] = {};
+  const b = $("body_"+q.id);
+  b.innerHTML = q.items.map((it,ii)=>`
+    <div class="subq">
+      <div class="sq">${it.q}</div>
+      <div class="opts ${q.stack?"stack":""} ${it.codes?"codes":""}" id="o_${q.id}_${ii}"></div>
+    </div>`).join("");
+  q.items.forEach((it,ii)=>{
+    const row = $(`o_${q.id}_${ii}`);
+    it.opts.forEach(o=>{
+      const el=document.createElement("button");
+      el.type="button"; el.className="opt";
+      el.innerHTML = (it.mono||it.codes) ? `<span class="m">${o}</span>` : o;
+      el.onclick = ()=>{
+        state.answers[q.id][ii]=o;
+        [...row.children].forEach(c=>c.classList.remove("sel"));
+        el.classList.add("sel");
+      };
+      row.appendChild(el);
+    });
+  });
+}
+
+/* ---- type: hunt ---- */
+function rHunt(q){
+  state.answers[q.id] = [];
+  const b = $("body_"+q.id);
+  b.innerHTML = `<div class="hunt" id="h_${q.id}"></div>`;
+  const box = $("h_"+q.id);
+  q.lines.forEach((ln,i)=>{
+    const lock = (q.locked||[]).includes(i);
+    const el=document.createElement("div");
+    el.className = "hl"+(lock?" nopick":"");
+    el.innerHTML = `<span class="ln">${i+1}</span><span>${esc(ln)}</span>`;
+    if(!lock) el.onclick = ()=>{
+      const a=state.answers[q.id], k=a.indexOf(i);
+      if(k>=0) a.splice(k,1); else a.push(i);
+      el.classList.toggle("pick");
+    };
+    box.appendChild(el);
+  });
+}
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ---- type: bins ---- */
+function rBins(q){
+  state.answers[q.id] = {};
+  const b = $("body_"+q.id);
+  b.innerHTML = q.items.map((it,ii)=>`
+    <div class="binq">
+      <div class="bt">${it.q}</div>
+      <div class="opts" id="b_${q.id}_${ii}"></div>
+    </div>`).join("");
+  q.items.forEach((it,ii)=>{
+    const row=$(`b_${q.id}_${ii}`);
+    q.bins.forEach(bn=>{
+      const el=document.createElement("button");
+      el.type="button"; el.className="opt"; el.textContent=bn;
+      el.onclick=()=>{
+        state.answers[q.id][ii]=bn;
+        [...row.children].forEach(c=>c.classList.remove("sel"));
+        el.classList.add("sel");
+      };
+      row.appendChild(el);
+    });
+  });
+}
+
+/* ---- marking ---- */
+function mark(q){
+  // A question whose station was never rendered (skipped by a cheat
+  // lockdown, or by restoring a finished attempt from localStorage on
+  // reload) never had state.answers[q.id] initialized by rOrder/rChoice/
+  // rHunt/rBins. Fall back to the same empty shape those would have set,
+  // so it scores as unanswered instead of throwing.
+  const a = state.answers[q.id] || ((q.type==="order"||q.type==="hunt") ? [] : {});
+  if(q.type==="order"){
+    const got = a.map(i=>q.tokens[i]);
+    const ok = got.length===q.answer.length && got.every((t,i)=>t===q.answer[i]);
+    return { got:ok?q.points:0, detail: ok?"Query built correctly.":"The sequence was not correct." };
+  }
+  if(q.type==="choice"||q.type==="bins"){
+    let got=0, right=0;
+    q.items.forEach((it,ii)=>{ if(a[ii]===it.answer){ got+=it.points; right++; } });
+    return { got, detail:`${right} of ${q.items.length} correct.` };
+  }
+  if(q.type==="hunt"){
+    const hits = a.filter(i=>q.bad.includes(i)).length;
+    const miss = a.filter(i=>!q.bad.includes(i)).length;
+    const got = Math.max(0, Math.min(q.points, hits-miss));
+    return { got, detail:`${hits} of ${q.bad.length} faults found${miss?`, ${miss} good line${miss>1?"s":""} wrongly flagged`:""}.` };
+  }
+  return { got:0, detail:"" };
+}
+function answered(q){
+  const a = state.answers[q.id];
+  if(q.type==="order") return a.length>0;
+  if(q.type==="hunt")  return a.length>0;
+  return Object.keys(a).length === q.items.length;
+}
+
+/* ---- lock ---- */
+$("btnLock").onclick = ()=>{
+  const s = QUIZ[state.stn];
+  const missing = s.questions.filter(q=>!answered(q));
+  if(missing.length){
+    $("lockWarn").textContent = `Answer every challenge first (${missing.length} still incomplete).`;
+    return;
+  }
+  let total=0;
+  s.questions.forEach(q=>{
+    const r = mark(q); total += r.got;
+    const box = $("box_"+q.id);
+    const good = r.got===q.points;
+    const fb = document.createElement("div");
+    fb.className = "fb "+(good?"good":"bad");
+    fb.innerHTML = `<b>${good?"✓ Correct":"✗ "+r.got+" of "+q.points}</b>${r.detail}
+      <div class="why">${q.why}</div>`;
+    box.appendChild(fb);
+    if(q.type==="hunt") revealHunt(q);
+  });
+  state.scores[state.stn] = total;
+  $("hudScore").textContent = state.scores.reduce((a,b)=>a+b,0);
+  drawMap($("mapRun"), state.stn+1);           // mark this station complete on the map
+  $("barFill").style.width = ((state.stn+1)/QUIZ.length*100)+"%";
+  $("qWrap").classList.add("locked");          // freeze answers, keep buttons usable
+  $("btnLock").classList.add("hide");
+  $("lockWarn").textContent = "";
+  const last = state.stn === QUIZ.length-1;
+  const nb = $("btnNext");
+  nb.classList.remove("hide");
+  nb.textContent = last ? "See my mission report →" : "Next station →";
+  $("stnFb").innerHTML = `<div class="note"><strong>Station locked.</strong>
+     You scored <strong>${total} / ${s.pts}</strong> at ${s.name}. ${last
+       ? "That was the final station — open your mission report below."
+       : "Read the explanations above, then move on."}</div>`;
+  $("btnNext").scrollIntoView({behavior:"smooth",block:"center"});
+};
+function revealHunt(q){
+  const box = $("h_"+q.id);
+  q.bad.forEach(i=>{
+    const el = box.children[i];
+    el.style.background = "var(--bad-bg)";
+    el.style.borderLeftColor = "var(--bad)";
+  });
+}
+
+/* ---- next ---- */
+$("btnNext").onclick = ()=>{
+  if(state.stn < QUIZ.length-1){
+    state.stn++; renderStation();
+  } else { finish(); }
+};
+
+/* ---- finish ---- */
+function finish(){
+  clearInterval(state.timer);
+  monitoring = false;
+  const total = state.scores.reduce((a,b)=>a+b,0);
+  $("scStation").classList.add("hide");
+  $("scDone").classList.remove("hide");
+  $("finalScore").textContent = total;
+  $("barFill").style.width = "100%";
+
+  const pct = total/TOTAL*100;
+  const grade = pct>=85 ? "🏆 Outstanding" : pct>=70 ? "⭐ Strong work"
+              : pct>=55 ? "✅ Passing" : pct>=40 ? "📘 Needs review" : "📕 See your lecturer";
+  $("finalGrade").textContent = grade;
+  $("doneTitle").textContent = pct>=70 ? "🏁 The registration system is live!" : "🏁 Mission report";
+
+  $("brBody").innerHTML = QUIZ.map((s,i)=>
+    `<tr><td>${s.icon} ${s.name}</td><td style="color:var(--muted)">${s.week}</td>
+     <td class="n">${state.scores[i]} / ${s.pts}</td></tr>`).join("");
+  $("brTotal").textContent = total+" / "+TOTAL;
+
+  $("outName").textContent = state.name;
+  $("outId").textContent = state.id;
+  $("outTime").textContent = fmt(state.elapsed);
+  $("subCode").textContent = makeCode(total);
+
+  $("revBody").innerHTML = QUIZ.map(s=>
+    `<h3>${s.icon} ${s.name}</h3>` + s.questions.map(q=>{
+      const r = mark(q), good = r.got===q.points;
+      return `<div class="rev ${good?"ok":"no"}">
+        <div class="rh">${good?"✓":"✗"} ${q.text} — ${r.got} / ${q.points}</div>
+        <div>${q.why}</div></div>`;
+    }).join("")).join("");
+  window.scrollTo({top:0,behavior:"smooth"});
+  saveSubmission();
+}
+
+/* ---- submission code: light tamper check, not security ---- */
+function makeCode(total){
+  const raw = state.id+"|"+state.name+"|"+total+"|"+state.elapsed;
+  let h=0; for(const c of raw){ h=(h*31 + c.charCodeAt(0))>>>0; }
+  return "W11-"+String(total).padStart(2,"0")+"-"+h.toString(16).toUpperCase().slice(0,6);
+}
+
+/* ---- download / print / review ---- */
+$("btnDl").onclick = ()=>{
+  const data = {
+    quiz:"CSC220 Quiz 2 — Registration Quest",
+    coverage:"Weeks 7-10 (MongoDB, REST APIs, Authentication, React)",
+    name:state.name, studentId:state.id,
+    score:state.scores.reduce((a,b)=>a+b,0), outOf:TOTAL,
+    stations:QUIZ.map((s,i)=>({station:s.name, covers:s.week, score:state.scores[i], outOf:s.pts})),
+    timeTaken:fmt(state.elapsed),
+    submissionCode:makeCode(state.scores.reduce((a,b)=>a+b,0)),
+    flaggedForCheating:state.cheatFlag,
+    finishedAt:new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `CSC220_Quiz2_${state.id||"student"}.json`;
+  a.click(); URL.revokeObjectURL(a.href);
+};
+$("btnPrint").onclick = ()=>window.print();
+$("btnReview").onclick = ()=>{
+  const c=$("revCard"); c.classList.toggle("hide");
+  if(!c.classList.contains("hide")) c.scrollIntoView({behavior:"smooth"});
+};
+
+/* allow Enter to start */
+["inName","inId"].forEach(id=>$(id).addEventListener("keydown",e=>{ if(e.key==="Enter") $("btnStart").click(); }));
+
+/* ==================================================================
+   INTEGRITY LAYER
+   Honest limits: this cannot detect or block a screenshot taken with
+   Snipping Tool, Print Screen, a phone camera, or any OS-level
+   capture — no webpage can. It detects the PrintScreen *keypress* and
+   counts it as a violation, but the capture itself still succeeds.
+   It reliably blocks copy/paste/right-click/Ctrl+P and counts
+   DevTools / view-source shortcut attempts. "Cannot retake after
+   refresh" is enforced with this browser's local storage, which is
+   cleared by a private window or clearing site data — a deterrent,
+   not a guarantee tied to the student's identity.
+   ================================================================== */
+const MAX_VIOLATIONS = 3;
+let violations = 0;
+let monitoring = false;
+let toastTimer = null;
+
+function showToast(msg){
+  const t = $("itToast");
+  t.innerHTML = msg;
+  t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove("show"), 3200);
+}
+
+function flagViolation(label){
+  if(!monitoring || state.cheatFlag) return;
+  violations++;
+  if(violations > MAX_VIOLATIONS){
+    lockdownForCheating();
+    return;
+  }
+  showToast(`⚠ Warning <b>${violations} / ${MAX_VIOLATIONS}</b> — ${label} is not allowed during this quiz.`);
+}
+
+document.addEventListener("contextmenu", e => { e.preventDefault(); flagViolation("Right-click"); });
+document.addEventListener("copy",  e => { e.preventDefault(); flagViolation("Copying"); });
+document.addEventListener("cut",   e => { e.preventDefault(); flagViolation("Cutting"); });
+document.addEventListener("paste", e => { e.preventDefault(); flagViolation("Pasting"); });
+
+document.addEventListener("keydown", e => {
+  const k = e.key, ctrlLike = e.ctrlKey || e.metaKey;
+  if(ctrlLike && (k==="p"||k==="P")){ e.preventDefault(); flagViolation("Printing (Ctrl+P)"); return; }
+  if(ctrlLike && (k==="u"||k==="U")){ e.preventDefault(); flagViolation("Viewing page source"); return; }
+  if(k==="F12"){ e.preventDefault(); flagViolation("Opening developer tools"); return; }
+  if(ctrlLike && e.shiftKey && ["I","i","J","j","C","c"].includes(k)){ e.preventDefault(); flagViolation("Opening developer tools"); return; }
+  if(k==="PrintScreen"){ flagViolation("Taking a screenshot"); return; }
+});
+
+/* ---- force-score whatever was answered, then lock the page ---- */
+function forceLockCurrentStation(){
+  if(typeof state.scores[state.stn] === "number") return;
+  const s = QUIZ[state.stn];
+  let total = 0;
+  s.questions.forEach(q => { total += mark(q).got; });
+  state.scores[state.stn] = total;
+}
+function fillRemainingZero(){
+  for(let i=0;i<QUIZ.length;i++){ if(typeof state.scores[i] !== "number") state.scores[i] = 0; }
+}
+function freezeInteraction(){
+  document.body.classList.add("it-frozen");
+  document.querySelectorAll("#qWrap button, #btnLock, #btnNext").forEach(b => b.disabled = true);
+}
+function lockdownForCheating(){
+  if(state.cheatFlag) return;
+  state.cheatFlag = true;
+  monitoring = false;
+  clearInterval(state.timer);
+  forceLockCurrentStation();
+  fillRemainingZero();
+  freezeInteraction();
+  $("itToast").classList.remove("show");
+  $("hudScore").textContent = state.scores.reduce((a,b)=>a+b,0);
+  $("itLockCount").textContent = `Violations detected: ${violations} — this attempt is locked`;
+  $("itLock").classList.add("show");
+}
+$("itLockContinue").onclick = ()=>{
+  $("itLock").classList.remove("show");
+  finish();
+  $("cheatBand").classList.remove("hide");
+};
+
+/* ---- one attempt per browser ---- */
+const SAVE_KEY = "csc220_quiz2_submission_v1";
+function saveSubmission(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      name: state.name, id: state.id, scores: state.scores,
+      elapsed: state.elapsed, cheatFlag: state.cheatFlag,
+      finishedAt: new Date().toISOString()
+    }));
+  }catch(e){ /* storage unavailable client-side; nothing more we can do */ }
+}
+function loadSubmission(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+let alreadySubmitted = false;
+
+function restoreFromSave(saved){
+  alreadySubmitted = true;
+  state.name = saved.name || "";
+  state.id = saved.id || "";
+  state.scores = saved.scores || [];
+  state.elapsed = saved.elapsed || 0;
+  state.cheatFlag = !!saved.cheatFlag;
+  $("scStart").classList.add("hide");
+  finish();
+  $("resumeBand").classList.remove("hide");
+  $("btnReview").classList.add("hide");
+  if(state.cheatFlag) $("cheatBand").classList.remove("hide");
+}
+
+(function initIntegrityGuard(){
+  const saved = loadSubmission();
+  if(saved) restoreFromSave(saved);
+})();
+</script>
+</body>
+</html>
